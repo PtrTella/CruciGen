@@ -44,6 +44,10 @@
       "Costituiscono gli estremi del sapere",
       "AZ"
     ],
+    "BG": [
+      "La Bulgaria sulle auto",
+      "BG"
+    ],
     "BU": [
       "L'abbaiare del cane",
       "BU"
@@ -384,6 +388,10 @@
       "Il provenzale antico",
       "OC"
     ],
+    "OE": [
+      "Da ponente a levante",
+      "OE"
+    ],
     "OF": [
       "Il di del gentleman",
       "OF"
@@ -464,9 +472,17 @@
       "Una divinità egizia",
       "RA"
     ],
+    "RC": [
+      "Polizza __ auto",
+      "RC"
+    ],
     "RE": [
       "Sovrano",
       "RE"
+    ],
+    "RI": [
+      "Rieti",
+      "RI"
     ],
     "RO": [
       "Precede il sigma",
@@ -575,6 +591,10 @@
     "UR": [
       "Città della Caldea",
       "UR"
+    ],
+    "VF": [
+      "La sigla sulla targa delle autopompe",
+      "VF"
     ],
     "VI": [
       "Il Paolo che successe a Giovanni XXIII",
@@ -1085,6 +1105,10 @@
     "DOC": [
       "Denominazione per vini di qualità",
       "DOC"
+    ],
+    "DOG": [
+      "L'hot di certe bancarelle",
+      "DOG"
     ],
     "DON": [
       "Un grande fiume russo",
@@ -2578,6 +2602,10 @@
       "Un epiteto da marrani",
       "VIL"
     ],
+    "VIP": [
+      "Uno da jet-set",
+      "VIP"
+    ],
     "VIS": [
       "La forza latina",
       "VIS"
@@ -2967,6 +2995,10 @@
     "AXUM": [
       "La città etiopica dai tanti obelischi",
       "AXUM"
+    ],
+    "AZIO": [
+      "Ottaviano vi sconfisse Marco Antonio",
+      "AZIO"
     ],
     "BABA": [
       "L'Alì che dice Apriti, Sesamo!",
@@ -8598,6 +8630,10 @@
       "È proverbiale il suo sonno",
       "GHIRO"
     ],
+    "GHOST": [
+      "__ writer: scrive libri per altri",
+      "GHOST"
+    ],
     "GIACO": [
       "Il corpetto di maglia metallica degli antichi guerrieri",
       "GIACO"
@@ -9970,6 +10006,10 @@
       "L'Assia attrice dei film con i telefoni bianchi",
       "NORIS"
     ],
+    "NORMA": [
+      "Celebre opera di Bellini",
+      "NORMA"
+    ],
     "NOTAI": [
       "Redigono atti",
       "NOTAI"
@@ -10313,6 +10353,10 @@
     "PAOLO": [
       "Fu la fiamma... di Francesca",
       "PAOLO"
+    ],
+    "PAPPA": [
+      "__ reale: è di miele e polline",
+      "PAPPA"
     ],
     "PARCA": [
       "Modica, frugale",
@@ -11286,6 +11330,10 @@
       "Il tipico vino di mele della Normandia",
       "SIDRO"
     ],
+    "SIENA": [
+      "La città toscana del più noto palio",
+      "SIENA"
+    ],
     "SIEPE": [
       "Può separare due appezzamenti di terreno",
       "SIEPE"
@@ -11754,6 +11802,10 @@
       "Sovrasta la soffitta",
       "TETTO"
     ],
+    "TIGER": [
+      "Il Woods campione statunitense di golf",
+      "TIGER"
+    ],
     "TIGLI": [
       "Gli alberi del viale berlinese Unter den Linden",
       "TIGLI"
@@ -12145,6 +12197,10 @@
     "VISTA": [
       "Chi l'ha buona, l'ha acuta",
       "VISTA"
+    ],
+    "VITTI": [
+      "Monica __ in Deserto rosso",
+      "VITTI"
     ],
     "VOLGA": [
       "Il più lungo fiume d'Europa",
@@ -12600,6 +12656,10 @@
       "Respiro affannoso... con termine letterario",
       "ANSITO"
     ],
+    "ANTERA": [
+      "La parte del fiore che contiene il polline",
+      "ANTERA"
+    ],
     "ANTICO": [
       "Relativo a tempi remoti",
       "ANTICO"
@@ -12699,6 +12759,10 @@
     "ARDIRE": [
       "Osare, avere il coraggio",
       "ARDIRE"
+    ],
+    "ARETHA": [
+      "__ Franklin, cantante soul",
+      "ARETHA"
     ],
     "AREZZO": [
       "La città natale di Petrarca",
@@ -13620,6 +13684,10 @@
       "Si pianta senza fare prima il buco",
       "CHIODO"
     ],
+    "CHOPIN": [
+      "Il compositore del quale sono celebri le Polacche",
+      "CHOPIN"
+    ],
     "CIACCO": [
       "Il celebre goloso dantesco",
       "CIACCO"
@@ -13787,6 +13855,10 @@
     "CORTEO": [
       "Sfila con musiche e bandiere",
       "CORTEO"
+    ],
+    "CORTES": [
+      "Lo Joaquín ballerino di flamenco",
+      "CORTÉS"
     ],
     "COSCIA": [
       "Lo è un prosciutto",
@@ -15104,6 +15176,10 @@
       "Un animale per Anna Maria Ortese e Iggy Pop",
       "IGUANA"
     ],
+    "ILARIO": [
+      "Il santo di Poitiers",
+      "ILARIO"
+    ],
     "ILLESA": [
       "Sana e salva",
       "ILLESA"
@@ -15139,6 +15215,10 @@
     "INDACO": [
       "Il colore dell'anile",
       "INDACO"
+    ],
+    "INDIOS": [
+      "Popolano l'Amazzonia",
+      "INDIOS"
     ],
     "INDOMO": [
       "Rimasto selvaggio",
@@ -15804,9 +15884,17 @@
       "I più piccoli",
       "MINIMI"
     ],
+    "MINORE": [
+      "L'Agrippina sorella di Caligola",
+      "MINORE"
+    ],
     "MINUTO": [
       "È primo o secondo",
       "MINUTO"
+    ],
+    "MIRAGE": [
+      "Un caccia militare francese",
+      "MIRAGE"
     ],
     "MIRATO": [
       "Fissato... dal tiratore",
@@ -18352,6 +18440,10 @@
       "Il noto social network cinese",
       "TIKTOK"
     ],
+    "TILSIT": [
+      "Nel 1807, Napoleone vi stipulò un trattato con lo zar",
+      "TILSIT"
+    ],
     "TIMIDI": [
       "Lo sono quelli che arrossiscono facilmente",
       "TIMIDI"
@@ -19446,6 +19538,10 @@
       "Si incide con il bisturi",
       "ASCESSO"
     ],
+    "ASINARA": [
+      "L'isola a nord di Stintino",
+      "ASINARA"
+    ],
     "ASININA": [
       "Attributo di una tosse che colpisce i bambini",
       "ASININA"
@@ -19469,6 +19565,10 @@
     "ASSENTI": [
       "Gli alunni non presenti in classe",
       "ASSENTI"
+    ],
+    "ASSIOLO": [
+      "È detto anche chiù",
+      "ASSIOLO"
     ],
     "ASSOLTO": [
       "Prosciolto dalle accuse",
@@ -19650,6 +19750,10 @@
       "Il pan che non è zuppa",
       "BAGNATO"
     ],
+    "BAGNINI": [
+      "Sono sempre pronti a buttarsi in piscina",
+      "BAGNINI"
+    ],
     "BAGNINO": [
       "È sempre pronto a tuffarsi",
       "BAGNINO"
@@ -19825,6 +19929,10 @@
     "BERLINO": [
       "Il cielo sopra __, film",
       "BERLINO"
+    ],
+    "BERLIOZ": [
+      "Il grande compositore francese della Sinfonia fantastica",
+      "BERLIOZ"
     ],
     "BERNESE": [
       "Uno svizzero della capitale",
@@ -20782,6 +20890,10 @@
       "La provincia calabrese situata più a nord",
       "COSENZA"
     ],
+    "COSETTA": [
+      "Quello che chi è in ritardo ha sempre da fare!",
+      "COSETTA"
+    ],
     "COSMICI": [
       "Relativi a tutto l'Universo",
       "COSMICI"
@@ -20981,6 +21093,10 @@
     "DIMITRI": [
       "Il Tiomkin grande compositore di musiche da film",
       "DIMITRI"
+    ],
+    "DIODATO": [
+      "Ha vinto Sanremo nel 2020 con Fai rumore",
+      "DIODATO"
     ],
     "DIOMEDE": [
       "Nutriva le sue cavalle con carne umana",
@@ -21557,6 +21673,10 @@
     "FRENARE": [
       "Bloccare le ruote",
       "FRENARE"
+    ],
+    "FRIMAIO": [
+      "Il mese rivoluzionario francese fra brumaio e nevoso",
+      "FRIMAIO"
     ],
     "FRISONE": [
       "Pregiate mucche olandesi",
@@ -23589,6 +23709,10 @@
     "PANCAKE": [
       "Si accompagna allo sciroppo d'acero",
       "PANCAKE"
+    ],
+    "PANDORO": [
+      "C'è chi lo preferisce al panettone",
+      "PANDORO"
     ],
     "PANFILI": [
       "Gli yacht italiani",
@@ -25798,6 +25922,10 @@
       "Parlare pomposamente dei propri meriti",
       "VANTARE"
     ],
+    "VARAITA": [
+      "Il primo importante affluente di destra del Po",
+      "VARAITA"
+    ],
     "VASETTI": [
       "Recipienti per pomate",
       "VASETTI"
@@ -26232,6 +26360,10 @@
       "Il re etiope padre di Aida",
       "AMONASRO"
     ],
+    "ANACAPRI": [
+      "Nell'isola dei Faraglioni",
+      "ANACAPRI"
+    ],
     "ANACARDI": [
       "Frutti simili alle mandorle",
       "ANACARDI"
@@ -26323,6 +26455,10 @@
     "ANTENATI": [
       "I nostri... precedenti",
       "ANTENATI"
+    ],
+    "ANTENORA": [
+      "Dante vi incontra Ugolino",
+      "ANTENORA"
     ],
     "ANTENORE": [
       "L'eroe troiano che consigliò la restituzione di Elena ai Greci",
@@ -27148,6 +27284,10 @@
       "Andrés Segovia ne era stato un virtuoso",
       "CHITARRA"
     ],
+    "CHITARRE": [
+      "Strumenti con manico e battipenna",
+      "CHITARRE"
+    ],
     "CIACCONA": [
       "Una danza del Settecento",
       "CIACCONA"
@@ -27363,6 +27503,10 @@
     "CONTESSA": [
       "Quella di Hong Kong ci ricorda un film di Chaplin",
       "CONTESSA"
+    ],
+    "COPERCHI": [
+      "Chiudono i barattoli",
+      "COPERCHI"
     ],
     "COPRIRSI": [
       "Ripararsi dal freddo",
@@ -28232,6 +28376,10 @@
       "Li vende il fioraio",
       "GLADIOLI"
     ],
+    "GLAMPING": [
+      "Campeggio con tende dotate di ogni comfort",
+      "GLAMPING"
+    ],
     "GOFFREDO": [
       "__ Parise, l'autore dei Sillabari",
       "GOFFREDO"
@@ -28507,6 +28655,10 @@
     "IPOSTASI": [
       "Unione della natura divina con l'umana nella persona di Gesù Cristo",
       "IPOSTASI"
+    ],
+    "IRENISTA": [
+      "Tende a trovare i punti comuni delle varie confessioni cristiane",
+      "IRENISTA"
     ],
     "IRONISTI": [
       "Scrittori sarcastici",
@@ -29228,6 +29380,10 @@
       "Lo sono i trattenimenti in cui si suona",
       "MUSICALI"
     ],
+    "NACCHERE": [
+      "Si suonano quando si balla il flamenco",
+      "NACCHERE"
+    ],
     "NASCOSTO": [
       "Celato",
       "NASCOSTO"
@@ -29347,6 +29503,10 @@
     "NOZAREGO": [
       "Piccola località nei pressi di Portofino",
       "NOZAREGO"
+    ],
+    "NUBILATO": [
+      "Lo abbandona la sposa",
+      "NUBILATO"
     ],
     "NUMERICI": [
       "Lo sono i calcoli aritmetici",
@@ -30107,6 +30267,10 @@
     "REOSTATO": [
       "Resistenza elettrica regolabile",
       "REOSTATO"
+    ],
+    "REPARATA": [
+      "Santa patrona di Firenze",
+      "REPARATA"
     ],
     "REPERIRE": [
       "Rintracciare, trovare",
@@ -30972,6 +31136,10 @@
       "Tutt'altro che dinamiche",
       "STATICHE"
     ],
+    "STATUINE": [
+      "I personaggi del presepio",
+      "STATUINE"
+    ],
     "STAZIONE": [
       "Vi sostano i treni",
       "STAZIONE"
@@ -31455,6 +31623,10 @@
     "UTOPISTA": [
       "Coltiva illusioni",
       "UTOPISTA"
+    ],
+    "VAGHEZZA": [
+      "Incertezza",
+      "VAGHEZZA"
     ],
     "VALLETTA": [
       "L'ha sostituita la velina",
@@ -32510,6 +32682,10 @@
       "Si accompagna con rucola e scaglie di parmigiano",
       "CARPACCIO"
     ],
+    "CARTAGENA": [
+      "Importante porto militare della Spagna",
+      "CARTAGENA"
+    ],
     "CARTOLAIE": [
       "Venditrici di matite e biro",
       "CARTOLAIE"
@@ -33238,6 +33414,10 @@
       "Esperti di bellezza",
       "ESTETISTI"
     ],
+    "ESTINTORE": [
+      "Spegne l'incendio",
+      "ESTINTORE"
+    ],
     "ESTREMITA": [
       "Le mani e i piedi",
       "ESTREMITÀ"
@@ -33249,6 +33429,10 @@
     "ETICHETTE": [
       "Si staccano dai vestiti una volta comprati",
       "ETICHETTE"
+    ],
+    "EURONIGHT": [
+      "Un treno notturno",
+      "EURONIGHT"
     ],
     "EUTANASIA": [
       "Morte provocata per pietà",
@@ -34490,6 +34674,10 @@
       "Fu un astrologo, medico e alchimista svizzero",
       "PARACELSO"
     ],
+    "PARAFFINA": [
+      "Serve per fare candele",
+      "PARAFFINA"
+    ],
     "PARAPETTI": [
       "Ai lati di un ponte",
       "PARAPETTI"
@@ -34997,6 +35185,10 @@
     "RICIRCOLO": [
       "Blocca l'afflusso di aria esterna nell'auto",
       "RICIRCOLO"
+    ],
+    "RIEPILOGO": [
+      "Il sunto di quanto si è detto",
+      "RIEPILOGO"
     ],
     "RIFIUTATO": [
       "Non voluto",
@@ -35618,6 +35810,10 @@
       "Terreno in cui si raccolgono preziosi tuberi",
       "TARTUFAIA"
     ],
+    "TASCHETTE": [
+      "Piccoli scomparti degli zaini",
+      "TASCHETTE"
+    ],
     "TEATRANTE": [
       "Recita con troppa enfasi",
       "TEATRANTE"
@@ -35874,6 +36070,10 @@
       "Trasportano gas o liquidi",
       "TUBAZIONI"
     ],
+    "TUDERTINI": [
+      "I nativi di Todi",
+      "TUDERTINI"
+    ],
     "TURBINATI": [
       "Corpi ossei delle fosse nasali",
       "TURBINATI"
@@ -36111,6 +36311,10 @@
     "AMBROSIANI": [
       "Milanesi... purosangue",
       "AMBROSIANI"
+    ],
+    "ANCONETANI": [
+      "I Marchigiani del capoluogo",
+      "ANCONETANI"
     ],
     "ANCORAGGIO": [
       "La sistemazione alla fonda",
@@ -36784,6 +36988,10 @@
       "Le materie di studio",
       "DISCIPLINE"
     ],
+    "DISERBANTE": [
+      "Prodotto che spoglia i prati",
+      "DISERBANTE"
+    ],
     "DISMETTERE": [
       "Cessare l'utilizzo di una strada o di un impianto",
       "DISMETTERE"
@@ -37383,6 +37591,10 @@
     "MADAGASCAR": [
       "La patria dei malgasci",
       "MADAGASCAR"
+    ],
+    "MAGRISSIMO": [
+      "Lo è uno al quale si contano le costole",
+      "MAGRISSIMO"
     ],
     "MALINCONIA": [
       "La tristezza del nostalgico",
@@ -38782,6 +38994,10 @@
       "Ha per capitale Baku",
       "AZERBAIGIAN"
     ],
+    "BALESTRIERI": [
+      "Disputano il palio di Gubbio",
+      "BALESTRIERI"
+    ],
     "BARZELLETTE": [
       "Se non fan ridere sono penose",
       "BARZELLETTE"
@@ -38841,6 +39057,10 @@
     "CANOTTAGGIO": [
       "Impegna chi è in voga",
       "CANOTTAGGIO"
+    ],
+    "CANTASTORIE": [
+      "Un menestrello",
+      "CANTASTORIE"
     ],
     "CANZONATURA": [
       "Maliziosa presa in giro",
@@ -38918,6 +39138,10 @@
       "Un musicista rock",
       "CHITARRISTA"
     ],
+    "CHITARRISTI": [
+      "I suonatori che accompagnano il flamenco",
+      "CHITARRISTI"
+    ],
     "CIRCANNUALE": [
       "Il ritmo biologico dell'uomo che si ripete più o meno ogni dodici mesi",
       "CIRCANNUALE"
@@ -38949,6 +39173,10 @@
     "COMPROMESSI": [
       "Contratti preliminari",
       "COMPROMESSI"
+    ],
+    "CONCLUSIONI": [
+      "Termini, esiti",
+      "CONCLUSIONI"
     ],
     "CONDUTTANZA": [
       "L'inverso della resistenza ohmica",
@@ -39689,6 +39917,10 @@
     "QUADRIENNIO": [
       "Passa tra due Olimpiadi",
       "QUADRIENNIO"
+    ],
+    "RACHMANINOV": [
+      "Sergej __, celebre pianista e compositore russo",
+      "RACHMANINOV"
     ],
     "RADIOGRAFIA": [
       "Una lastra ai raggi X",
