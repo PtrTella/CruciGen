@@ -114,17 +114,13 @@ function generateNewCrossword() {
   showLoader("Generazione schema in corso...");
   
   const size = selectSize.value;
-  console.log("Selected size:", size);
-  const list = window.TEMPLATES[size];
-  if (!list || list.length === 0) {
-    console.log("Error: TEMPLATES not found for size", size);
-    return;
-  }
-  // Select a random template layout
-  const templateObj = list[Math.floor(Math.random() * list.length)];
-  console.log("Selected template:", templateObj.name);
+  console.log("Selected size for generation:", size);
+  const parts = size.split('x');
+  const rows = parseInt(parts[0]);
+  const cols = parseInt(parts[1]);
   
-  worker.postMessage({ action: "generate", template: templateObj.grid });
+  console.log(`Sending generate command for random ${rows}x${cols} template`);
+  worker.postMessage({ action: "generate", template: "random", rows: rows, cols: cols });
 }
 
 // Loader controls

@@ -17,7 +17,7 @@ function normalizeChar(c) {
 }
 
 self.onmessage = function(e) {
-  const { action, template, dict } = e.data;
+  const { action, template, rows, cols, dict } = e.data;
 
   if (action === "init") {
     dictionary = dict;
@@ -32,7 +32,11 @@ self.onmessage = function(e) {
     }
 
     try {
-      const result = generateCrossword(template);
+      let gridTemplate = template;
+      if (template === "random" || !template) {
+        gridTemplate = createRandomSymmetricTemplate(rows || 11, cols || 11);
+      }
+      const result = generateCrossword(gridTemplate);
       if (result) {
         self.postMessage({ status: "success", result });
       } else {
@@ -273,4 +277,134 @@ function generateCrossword(template) {
     verticalClues,
     gridSize: { rows, cols }
   };
+}
+
+function createRandomSymmetricTemplate(rows, cols) {
+  const totalCells = rows * cols;
+  // Around 16-18% black cells density is standard and gives beautiful grids
+  const targetBlack = Math.floor(totalCells * 0.17); 
+  
+  let attempts = 0;
+  while (attempts < 1000) {
+    attempts++;
+    
+    // Create empty grid
+    const grid = Array(rows).fill(null).map(() => Array(cols).fill(' '));
+    
+    // Place black cells symmetrically
+    let blackPlaced = 0;
+    const maxPlacements = 150;
+    let placements = 0;
+    
+    while (blackPlaced < targetBlack && placements < maxPlacements) {
+      placements++;
+      const r = Math.floor(Math.random() * rows);
+      const c = Math.floor(Math.random() * cols);
+      
+      if (grid[r][c] === ' ') {
+        const symR = rows - 1 - r;
+        const symC = cols - 1 - c;
+        
+        grid[r][c] = '#';
+        grid[symR][symC] = '#';
+        
+        if (r === symR && c === symC) {
+          blackPlaced += 1;
+        } else {
+          blackPlaced += 2;
+        }
+      }
+    }
+    
+    // Validate slot lengths (all slots must be between 2 and 11)
+    if (validateTemplate(grid, rows, cols)) {
+      return grid.map(row => row.join(''));
+    }
+  }
+  
+  // Fallback to a very simple symmetric template if random generation fails
+  const fallback = Array(rows).fill(null).map((_, r) => {
+    let row = Array(cols).fill(' ');
+    // Simple diagonal pattern for fallback
+    if (r === Math.floor(rows / 2)) {
+      row[Math.floor(cols / 2)] = '#';
+    }
+    return row.join('');
+  });
+  return fallback;
+}
+
+function validateTemplate(grid, rows, cols) {
+  // Check horizontal slots lengths
+  for (let r = 0; r < rows; r++) {
+    let len = 0;
+    for (let c = 0; c < cols; c++) {
+      if (grid[r][c] !== '#') {
+        len++;
+      } else {
+        if (len > 0) {
+          if (len < 2 || len > 11) return false;
+          len = 0;
+        }
+      }
+    }
+    if (len > 0 && (len < 2 || len > 11)) return false;
+  }
+  
+  // Check vertical slots lengths
+  for (let c = 0; c < cols; c++) {
+    let len = 0;
+    for (let r = 0; r < rows; r++) {
+      if (grid[r][c] !== '#') {
+        len++;
+      } else {
+        if (len > 0) {
+          if (len < 2 || len > 11) return false;
+          len = 0;
+        }
+      }
+    }
+    if (len > 0 && (len < 2 || len > 11)) return false;
+  }
+  
+  // Check connectivity (flood fill from first white cell)
+  let startR = -1, startC = -1;
+  let whiteCount = 0;
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      if (grid[r][c] !== '#') {
+        whiteCount++;
+        if (startR === -1) {
+          startR = r;
+          startC = c;
+        }
+      }
+    }
+  }
+  
+  if (startR === -1) return false;
+  
+  const visited = Array(rows).fill(null).map(() => Array(cols).fill(false));
+  let filledCount = 0;
+  const queue = [[startR, startC]];
+  visited[startR][startC] = true;
+  
+  while (queue.length > 0) {
+    const [r, c] = queue.shift();
+    filledCount++;
+    
+    const dirs = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+    for (const [dr, dc] of dirs) {
+      const nr = r + dr;
+      const nc = c + dc;
+      if (nr >= 0 && nr < rows && nc >= 0 && nc < cols) {
+        if (grid[nr][nc] !== '#' && !visited[nr][nc]) {
+          visited[nr][nc] = true;
+          queue.push([nr, nc]);
+        }
+      }
+    }
+  }
+  
+  return filledCount === whiteCount;
 }
