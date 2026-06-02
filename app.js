@@ -338,7 +338,9 @@ function updateHighlights(row, col) {
     const clueLi = document.querySelector(`#${listId} li[data-num="${currentClue.num}"]`);
     if (clueLi) {
       clueLi.classList.add("highlight-active-clue");
-      clueLi.scrollIntoView({ block: "nearest", behavior: "smooth" });
+      if (window.innerWidth > 768) {
+        clueLi.scrollIntoView({ block: "nearest", behavior: "smooth" });
+      }
     }
     
     // Update mobile clue bar
