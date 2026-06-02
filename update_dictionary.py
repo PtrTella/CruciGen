@@ -57,7 +57,7 @@ class DictionaryUpdater:
         self.headers = {
             "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
         }
-        self.added_by_length = {str(i): 0 for i in range(2, 12)}
+        self.added_by_length = {str(i): 0 for i in range(2, 16)}
         self.load_dictionary()
 
     def load_dictionary(self):
@@ -70,14 +70,14 @@ class DictionaryUpdater:
                 )
             except Exception as e:
                 print(f"Error loading dictionary: {e}. Starting fresh.")
-                self.dictionary = {str(i): {} for i in range(2, 12)}
+                self.dictionary = {str(i): {} for i in range(2, 16)}
         else:
-            self.dictionary = {str(i): {} for i in range(2, 12)}
+            self.dictionary = {str(i): {} for i in range(2, 16)}
 
     def get_total_words(self):
         return sum(
             len(self.dictionary[str(length)])
-            for length in range(2, 12)
+            for length in range(2, 16)
             if str(length) in self.dictionary
         )
 
@@ -104,7 +104,7 @@ class DictionaryUpdater:
 
     def add_word(self, word, clue, overwrite=False):
         word_clean = normalize_accents(word).upper()
-        if not word_clean.isalpha() or len(word_clean) < 2 or len(word_clean) > 11:
+        if not word_clean.isalpha() or len(word_clean) < 2 or len(word_clean) > 15:
             return False
 
         # Filter verb conjugations
@@ -239,6 +239,10 @@ class DictionaryUpdater:
             "https://www.dizy.com/it/cruciverba/len/9",
             "https://www.dizy.com/it/cruciverba/len/10",
             "https://www.dizy.com/it/cruciverba/len/11",
+            "https://www.dizy.com/it/cruciverba/len/12",
+            "https://www.dizy.com/it/cruciverba/len/13",
+            "https://www.dizy.com/it/cruciverba/len/14",
+            "https://www.dizy.com/it/cruciverba/len/15",
         ]
 
         for s in seeds:
