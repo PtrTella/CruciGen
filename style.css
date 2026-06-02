@@ -1,0 +1,682 @@
+/* style.css */
+
+/* --- Core Design System & Tokens --- */
+:root {
+  /* HSL Tailored Colors (Dark Mode Default) */
+  --bg-primary: hsl(222, 47%, 11%);
+  --bg-secondary: hsl(223, 47%, 16%);
+  --bg-card: hsla(223, 47%, 20%, 0.5);
+  --border-color: hsla(220, 20%, 50%, 0.15);
+  --border-glow: hsla(250, 85%, 65%, 0.1);
+  
+  --text-primary: hsl(210, 40%, 98%);
+  --text-secondary: hsl(215, 20%, 75%);
+  --text-muted: hsl(215, 15%, 55%);
+  
+  --accent-color: hsl(250, 85%, 65%);
+  --accent-hover: hsl(250, 95%, 70%);
+  --accent-light: hsla(250, 85%, 65%, 0.15);
+  --accent-glow: hsla(250, 85%, 65%, 0.3);
+  
+  --highlight-cell: hsl(250, 85%, 65%);
+  --highlight-word: hsla(250, 85%, 65%, 0.25);
+  --highlight-word-light: hsla(250, 85%, 65%, 0.12);
+  
+  --error-color: hsl(350, 85%, 60%);
+  --error-bg: hsla(350, 85%, 60%, 0.2);
+  --success-color: hsl(140, 75%, 50%);
+  --success-bg: hsla(140, 75%, 50%, 0.15);
+  
+  --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.25), 0 10px 10px -5px rgba(0, 0, 0, 0.15);
+  --shadow-glow: 0 0 25px hsla(250, 85%, 65%, 0.25);
+  
+  --border-radius-sm: 8px;
+  --border-radius-md: 16px;
+  --border-radius-lg: 24px;
+  
+  --font-family-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-family-display: 'Outfit', sans-serif;
+  
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* --- Light Mode Overrides --- */
+body.light-mode {
+  --bg-primary: hsl(210, 30%, 96%);
+  --bg-secondary: hsl(0, 0%, 100%);
+  --bg-card: hsla(0, 0%, 100%, 0.6);
+  --border-color: hsla(220, 20%, 30%, 0.1);
+  --border-glow: hsla(250, 85%, 65%, 0.05);
+  
+  --text-primary: hsl(222, 47%, 12%);
+  --text-secondary: hsl(222, 20%, 40%);
+  --text-muted: hsl(222, 12%, 60%);
+  
+  --accent-color: hsl(250, 80%, 58%);
+  --accent-hover: hsl(250, 90%, 50%);
+  --accent-light: hsla(250, 80%, 58%, 0.1);
+  --accent-glow: hsla(250, 80%, 58%, 0.2);
+  
+  --highlight-word: hsla(250, 80%, 58%, 0.16);
+  --highlight-word-light: hsla(250, 80%, 58%, 0.08);
+  
+  --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.05);
+}
+
+/* --- Base Styles & Reset --- */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-family-sans);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow-x: hidden;
+  transition: background-color var(--transition-normal), color var(--transition-normal);
+}
+
+/* Animated background glow */
+.glass-bg {
+  position: fixed;
+  top: -10%;
+  left: -10%;
+  width: 120%;
+  height: 120%;
+  z-index: -1;
+  background: radial-gradient(circle at 10% 20%, hsla(250, 85%, 65%, 0.08) 0%, transparent 40%),
+              radial-gradient(circle at 90% 80%, hsla(330, 85%, 65%, 0.06) 0%, transparent 40%);
+  pointer-events: none;
+}
+
+/* --- Typography --- */
+h1, h2, h3, button, select {
+  font-family: var(--font-family-display);
+}
+
+/* --- Scrollbar Customization --- */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* --- Layout --- */
+header {
+  background: hsla(var(--bg-secondary), 0.6);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border-color);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  padding: 1rem 2rem;
+  transition: background-color var(--transition-normal);
+}
+
+.header-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.logo-icon {
+  font-size: 1.8rem;
+  color: var(--accent-color);
+  filter: drop-shadow(0 0 8px var(--accent-glow));
+}
+
+.logo h1 {
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+
+.logo h1 span {
+  color: var(--accent-color);
+}
+
+.controls-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.size-selector {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.size-selector select {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-sm);
+  padding: 0.4rem 1.8rem 0.4rem 0.6rem;
+  font-weight: 500;
+  cursor: pointer;
+  outline: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='hsl(215, 15%, 55%)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 0.5rem center;
+  background-size: 1rem;
+  transition: border-color var(--transition-fast);
+}
+
+.size-selector select:hover {
+  border-color: var(--accent-color);
+}
+
+/* --- Buttons --- */
+button {
+  border: none;
+  cursor: pointer;
+  border-radius: var(--border-radius-sm);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all var(--transition-fast);
+}
+
+.btn-primary {
+  background-color: var(--accent-color);
+  color: hsl(210, 40%, 98%);
+  padding: 0.6rem 1.2rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-primary:hover {
+  background-color: var(--accent-hover);
+  box-shadow: var(--shadow-glow);
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  padding: 0.6rem 1.2rem;
+}
+
+.btn-secondary:hover {
+  border-color: var(--accent-color);
+  background-color: var(--accent-light);
+  color: var(--accent-color);
+}
+
+.btn-icon {
+  background-color: var(--bg-secondary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 50%;
+}
+
+.btn-icon:hover {
+  border-color: var(--accent-color);
+  color: var(--accent-color);
+}
+
+/* --- Cards (Glassmorphism) --- */
+.card {
+  background: var(--bg-card);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  transition: border-color var(--transition-normal), box-shadow var(--transition-normal);
+}
+
+.card:hover {
+  border-color: var(--border-glow);
+}
+
+/* --- Main Layout --- */
+main {
+  flex: 1;
+  padding: 2rem;
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.main-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+/* --- Grid Section --- */
+.grid-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+}
+
+.grid-card {
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  position: relative;
+}
+
+#crossword-grid-container {
+  display: grid;
+  gap: 2px;
+  background-color: var(--border-color);
+  border: 4px solid var(--bg-secondary);
+  border-radius: var(--border-radius-sm);
+  padding: 2px;
+  max-width: 100%;
+  width: auto;
+  box-shadow: var(--shadow-sm);
+}
+
+/* --- Grid Cell --- */
+.cell {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  background-color: var(--bg-secondary);
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color var(--transition-fast);
+}
+
+.cell.black {
+  background-color: var(--bg-primary);
+  background-image: radial-gradient(circle, var(--bg-secondary) 1px, transparent 1px);
+  background-size: 8px 8px;
+}
+
+.cell-num {
+  position: absolute;
+  top: 2px;
+  left: 3px;
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.cell-input {
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: transparent;
+  color: var(--text-primary);
+  text-align: center;
+  font-size: 1.25rem;
+  font-weight: 700;
+  font-family: var(--font-family-display);
+  text-transform: uppercase;
+  caret-color: transparent; /* Hide browser blink cursor */
+  outline: none;
+  cursor: pointer;
+  padding-top: 6px;
+}
+
+/* Cell State Highlights */
+.cell.highlight-word {
+  background-color: var(--highlight-word);
+}
+
+.cell.highlight-active {
+  background-color: var(--highlight-cell) !important;
+}
+
+.cell.highlight-active .cell-input {
+  color: hsl(210, 40%, 98%) !important;
+}
+
+.cell.error {
+  background-color: var(--error-bg);
+}
+
+.cell.error .cell-input {
+  color: var(--error-color);
+}
+
+.cell.verified {
+  background-color: var(--success-bg);
+}
+
+.cell.verified .cell-input {
+  color: var(--success-color);
+}
+
+/* Action Bar below grid */
+.action-bar {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  width: 100%;
+}
+
+/* Mobile Pinned Clue Bar */
+.mobile-clue-bar {
+  display: none;
+  width: 100%;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-sm);
+  padding: 0.8rem 1rem;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.95rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.clue-direction-badge {
+  font-family: var(--font-family-display);
+  font-weight: 700;
+  font-size: 0.75rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  background: var(--accent-color);
+  color: white;
+  letter-spacing: 0.5px;
+}
+
+.clue-direction-badge.vert {
+  background: hsl(330, 85%, 65%);
+}
+
+.mobile-clue-bar .clue-text {
+  font-weight: 500;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+/* --- Clues Section (Right Column) --- */
+.clues-section {
+  width: 100%;
+}
+
+.clues-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.clues-card {
+  padding: 1.5rem;
+}
+
+.clues-card h2 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.badge {
+  font-size: 0.75rem;
+  font-weight: 800;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.badge-horiz {
+  background-color: var(--accent-color);
+}
+
+.badge-vert {
+  background-color: hsl(330, 85%, 65%);
+}
+
+.clues-list-scroll {
+  max-height: 250px;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+
+.clues-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.clues-list li {
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--border-radius-sm);
+  font-size: 0.9rem;
+  line-height: 1.4;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  display: flex;
+  gap: 0.5rem;
+}
+
+.clues-list li:hover {
+  background-color: var(--accent-light);
+  color: var(--text-primary);
+}
+
+.clues-list li.highlight-word-clue {
+  background-color: var(--highlight-word-light);
+  color: var(--accent-color);
+  font-weight: 600;
+}
+
+.clues-list li.highlight-active-clue {
+  background-color: var(--accent-color) !important;
+  color: white !important;
+  font-weight: 600;
+}
+
+.clues-list li span.clue-num {
+  font-weight: 700;
+  min-width: 1.5rem;
+  color: var(--text-muted);
+}
+
+.clues-list li.highlight-active-clue span.clue-num {
+  color: hsla(0, 0%, 100%, 0.8);
+}
+
+.empty-clue {
+  color: var(--text-muted) !important;
+  font-style: italic;
+  cursor: default !important;
+}
+
+.empty-clue:hover {
+  background: transparent !important;
+}
+
+/* --- Loader Overlay --- */
+.loader-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--bg-card);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  transition: opacity var(--transition-normal);
+}
+
+.loader-overlay.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.spinner-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid var(--border-color);
+  border-top-color: var(--accent-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  filter: drop-shadow(0 0 10px var(--accent-glow));
+}
+
+#loader-text {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-family: var(--font-family-display);
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* --- Footer --- */
+footer {
+  border-top: 1px solid var(--border-color);
+  background: hsla(var(--bg-secondary), 0.3);
+  padding: 1.5rem;
+  margin-top: auto;
+  text-align: center;
+}
+
+.footer-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+kbd {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 0.1rem 0.4rem;
+  font-size: 0.75rem;
+  color: var(--text-primary);
+  box-shadow: 0 1px 0 rgba(0,0,0,0.2);
+}
+
+/* --- Responsive Adjustments --- */
+@media (max-width: 900px) {
+  .main-container {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .grid-card {
+    padding: 1.2rem;
+  }
+  
+  .cell {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .cell-input {
+    font-size: 1.1rem;
+    padding-top: 4px;
+  }
+  
+  .clues-container {
+    grid-template-columns: 1fr 1fr;
+    display: grid;
+    gap: 1rem;
+  }
+  
+  header {
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .clues-container {
+    grid-template-columns: 1fr;
+  }
+  
+  .cell {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .cell-input {
+    font-size: 1rem;
+    padding-top: 2px;
+  }
+  
+  .mobile-clue-bar {
+    display: flex;
+  }
+  
+  .action-bar {
+    flex-wrap: wrap;
+  }
+  
+  .action-bar button {
+    flex: 1;
+    min-width: 90px;
+    font-size: 0.85rem;
+    padding: 0.5rem;
+  }
+}
