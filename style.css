@@ -308,8 +308,8 @@ main {
   border: 4px solid var(--bg-secondary);
   border-radius: var(--border-radius-sm);
   padding: 2px;
-  max-width: 100%;
-  width: auto;
+  width: 100%;
+  max-width: 480px; /* Capped size on desktop, fully fluid on mobile */
   box-shadow: var(--shadow-sm);
 }
 
@@ -318,8 +318,8 @@ main {
   position: relative;
   aspect-ratio: 1 / 1;
   background-color: var(--bg-secondary);
-  width: 44px;
-  height: 44px;
+  width: 100%;
+  height: auto;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -327,16 +327,15 @@ main {
 }
 
 .cell.black {
-  background-color: var(--bg-primary);
-  background-image: radial-gradient(circle, var(--bg-secondary) 1px, transparent 1px);
-  background-size: 8px 8px;
+  background-color: #000000; /* Pure black for high contrast */
+  background-image: none; /* Clean solid look */
 }
 
 .cell-num {
   position: absolute;
   top: 2px;
   left: 3px;
-  font-size: 0.6rem;
+  font-size: clamp(0.45rem, 1.8vw, 0.6rem);
   font-weight: 700;
   color: var(--text-muted);
   pointer-events: none;
@@ -349,14 +348,14 @@ main {
   background: transparent;
   color: var(--text-primary);
   text-align: center;
-  font-size: 1.25rem;
+  font-size: clamp(0.85rem, 3.5vw, 1.25rem);
   font-weight: 700;
   font-family: var(--font-family-display);
   text-transform: uppercase;
   caret-color: transparent; /* Hide browser blink cursor */
   outline: none;
   cursor: pointer;
-  padding-top: 6px;
+  padding-top: clamp(2px, 1.5vw, 6px);
 }
 
 /* Cell State Highlights */
@@ -629,16 +628,6 @@ kbd {
     padding: 1.2rem;
   }
   
-  .cell {
-    width: 36px;
-    height: 36px;
-  }
-  
-  .cell-input {
-    font-size: 1.1rem;
-    padding-top: 4px;
-  }
-  
   .clues-container {
     grid-template-columns: 1fr 1fr;
     display: grid;
@@ -653,16 +642,6 @@ kbd {
 @media (max-width: 600px) {
   .clues-container {
     grid-template-columns: 1fr;
-  }
-  
-  .cell {
-    width: 32px;
-    height: 32px;
-  }
-  
-  .cell-input {
-    font-size: 1rem;
-    padding-top: 2px;
   }
   
   .mobile-clue-bar {

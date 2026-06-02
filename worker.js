@@ -2,12 +2,23 @@
 // Web Worker for generating the crossword layout using backtracking search.
 
 let dictionary = null;
+let wordScores = {};
+let dictionaryKeys = {};
 
 self.onmessage = function(e) {
   const { action, template, dict } = e.data;
 
   if (action === "init") {
     dictionary = dict;
+    wordScores = {};
+    dictionaryKeys = {};
+    for (const len in dictionary) {
+      const lengthInt = parseInt(len);
+      dictionaryKeys[len] = Object.keys(dictionary[len]);
+      for (const word in dictionary[len]) {
+        wordScores[word] = calculateWordScore(word, lengthInt);
+      }
+    }
     self.postMessage({ status: "ready" });
     return;
   }
@@ -97,7 +108,6 @@ function generateCrossword(template) {
       }
     }
   }
-
   // Pre-calculate slot cell indexes for matching patterns
   slots.forEach(slot => {
     slot.patternIndices = slot.cells.map(([r, c]) => ({ r, c }));
@@ -105,7 +115,7 @@ function generateCrossword(template) {
 
   // 3. Backtracking Solver with MRV and Randomization
   let steps = 0;
-  const maxSteps = 10000; // Fast cutoff since templates are pre-validated
+  const maxSteps = 3000; // Fast cutoff to avoid worker freeze
   const usedWords = new Set();
 
   function solve(slotIndex) {
@@ -145,8 +155,12 @@ function generateCrossword(template) {
 
     const currentSlot = slots[slotIndex];
     
-    // Shuffle candidates to ensure randomness of the crossword
-    shuffle(bestCandidates);
+    // Sort candidates using pre-calculated heuristic scoring
+    bestCandidates.sort((a, b) => {
+      const scoreA = (wordScores[a] || 0) + Math.random() * 2;
+      const scoreB = (wordScores[b] || 0) + Math.random() * 2;
+      return scoreB - scoreA;
+    });
 
     for (const candidate of bestCandidates) {
       if (usedWords.has(candidate)) continue;
@@ -165,6 +179,7 @@ function generateCrossword(template) {
 
       // Recurse
       if (solve(slotIndex + 1)) return true;
+      if (steps > maxSteps) return false; // Fast abort propagation
 
       // Backtrack
       usedWords.delete(candidate);
@@ -185,10 +200,10 @@ function generateCrossword(template) {
 
   function getCandidates(len, pattern) {
     const lenStr = len.toString();
-    if (!dictionary[lenStr]) return [];
+    if (!dictionaryKeys[lenStr]) return [];
 
     const candidates = [];
-    const keys = Object.keys(dictionary[lenStr]);
+    const keys = dictionaryKeys[lenStr];
     
     for (const word of keys) {
       let matches = true;
@@ -214,7 +229,6 @@ function generateCrossword(template) {
 
   // Initial sort
   slots.sort((a, b) => b.length - a.length);
-
   const solved = solve(0);
   if (!solved) return null;
 
@@ -257,3 +271,22 @@ function generateCrossword(template) {
     steps
   };
 }
+
+function calculateWordScore(word, len) {
+  let score = 0;
+  const vowels = (word.match(/[AEIOU]/g) || []).length;
+  const vowelRatio = vowels / len;
+
+  // Ideal vowel ratio for Italian is around 40-55%
+  if (vowelRatio >= 0.4 && vowelRatio <= 0.6) {
+    score += 15;
+  } else if (vowelRatio >= 0.3 && vowelRatio <= 0.7) {
+    score += 5;
+  }
+
+  // Penalize highly repetitive letters (e.g. BBB)
+  const uniqueLetters = new Set(word).size;
+  score += (uniqueLetters / len) * 10;
+  return score;
+}
+

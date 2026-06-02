@@ -7,28 +7,51 @@ let activeDirection = "H"; // "H" = Orizzontali, "V" = Verticali
 let dictionaryLoaded = false;
 
 // DOM Elements
-const gridContainer = document.getElementById("crossword-grid-container");
-const btnNew = document.getElementById("btn-new");
-const btnVerify = document.getElementById("btn-verify");
-const btnClear = document.getElementById("btn-clear");
-const btnReveal = document.getElementById("btn-reveal");
-const themeToggle = document.getElementById("theme-toggle");
-const selectSize = document.getElementById("grid-size-select");
-const loader = document.getElementById("loader");
-const loaderText = document.getElementById("loader-text");
-const listHorizontal = document.getElementById("clues-horizontal-list");
-const listVertical = document.getElementById("clues-vertical-list");
-const mobileClueBar = document.getElementById("mobile-clue-bar");
-const mobileBadge = document.getElementById("mobile-badge");
-const mobileClueText = document.getElementById("mobile-clue-text");
+let gridContainer, btnNew, btnVerify, btnClear, btnReveal, themeToggle, loader, loaderText, listHorizontal, listVertical, mobileClueBar, mobileBadge, mobileClueText;
 
 // Initialize application
-window.addEventListener("DOMContentLoaded", () => {
+function initApp() {
+  gridContainer = document.getElementById("crossword-grid-container");
+  btnNew = document.getElementById("btn-new");
+  btnVerify = document.getElementById("btn-verify");
+  btnClear = document.getElementById("btn-clear");
+  btnReveal = document.getElementById("btn-reveal");
+  themeToggle = document.getElementById("theme-toggle");
+  loader = document.getElementById("loader");
+  loaderText = document.getElementById("loader-text");
+  listHorizontal = document.getElementById("clues-horizontal-list");
+  listVertical = document.getElementById("clues-vertical-list");
+  mobileClueBar = document.getElementById("mobile-clue-bar");
+  mobileBadge = document.getElementById("mobile-badge");
+  mobileClueText = document.getElementById("mobile-clue-text");
+
   initTheme();
   setupEventListeners();
   initWorker();
   loadDictionary();
-});
+  registerServiceWorker();
+}
+
+if (document.readyState === "loading") {
+  window.addEventListener("DOMContentLoaded", initApp);
+} else {
+  initApp();
+}
+
+// Register Service Worker for PWA
+function registerServiceWorker() {
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker
+      .register("sw.js")
+      .then((reg) => {
+        log("Service Worker registrato con successo!");
+      })
+      .catch((err) => {
+        log(`Impossibile registrare il Service Worker: ${err.message}`);
+      });
+  }
+}
+
 
 // Custom Log utility
 function log(msg) {
@@ -52,7 +75,12 @@ function log(msg) {
 
 // Theme Management
 function initTheme() {
-  const savedTheme = localStorage.getItem("theme");
+  let savedTheme = "dark";
+  try {
+    savedTheme = localStorage.getItem("theme") || "dark";
+  } catch (e) {
+    console.warn("Storage access not allowed:", e);
+  }
   if (savedTheme === "light") {
     document.body.classList.remove("dark-mode");
     document.body.classList.add("light-mode");
@@ -63,14 +91,6 @@ function initTheme() {
     themeToggle.innerHTML = '<i class="fa-solid fa-sun"></i>';
   }
 }
-
-themeToggle.addEventListener("click", () => {
-  const isLight = document.body.classList.toggle("light-mode");
-  document.body.classList.toggle("dark-mode", !isLight);
-  localStorage.setItem("theme", isLight ? "light" : "dark");
-  themeToggle.innerHTML = isLight ? '<i class="fa-solid fa-moon"></i>' : '<i class="fa-solid fa-sun"></i>';
-  log(`Tema cambiato in modalità ${isLight ? "Chiara" : "Scura"}`);
-});
 
 let generationAttempts = 0;
 const maxGenerationAttempts = 5;
@@ -152,18 +172,22 @@ function generateNewCrossword(isRetry = false) {
     generationAttempts = 0;
   }
   
-  const size = selectSize.value;
-  log(`--- INIZIO GENERAZIONE (${size}) ---`);
+  log(`--- INIZIO GENERAZIONE DILIGENTE ---`);
   
-  const list = window.TEMPLATES[size];
-  if (!list || list.length === 0) {
-    log(`[ERRORE] Nessun template disponibile per la dimensione ${size}`);
+  // Raccogli tutti i template disponibili di qualsiasi dimensione
+  const allTemplates = [];
+  for (const sizeKey in window.TEMPLATES) {
+    allTemplates.push(...window.TEMPLATES[sizeKey]);
+  }
+  
+  if (allTemplates.length === 0) {
+    log(`[ERRORE] Nessun template disponibile nel sistema.`);
     return;
   }
   
-  // Select a random base template
-  const templateObj = list[Math.floor(Math.random() * list.length)];
-  log(`Selezionato template base: "${templateObj.name}"`);
+  // Seleziona un template base casuale
+  const templateObj = allTemplates[Math.floor(Math.random() * allTemplates.length)];
+  log(`Selezionato template base: "${templateObj.name}" (${templateObj.grid[0].length}x${templateObj.grid.length})`);
   
   // Apply a random symmetry transformation (rotation/mirroring)
   const transformedGrid = window.getRandomTransformation(templateObj.grid);
@@ -522,5 +546,17 @@ function setupEventListeners() {
     e.stopPropagation(); // prevent collapse
     const pre = document.getElementById("console-log-pre");
     if (pre) pre.textContent = "[Console svuotata]";
+  });
+
+  themeToggle.addEventListener("click", () => {
+    const isLight = document.body.classList.toggle("light-mode");
+    document.body.classList.toggle("dark-mode", !isLight);
+    try {
+      localStorage.setItem("theme", isLight ? "light" : "dark");
+    } catch (e) {
+      console.warn("Storage write not allowed:", e);
+    }
+    themeToggle.innerHTML = isLight ? '<i class="fa-solid fa-moon"></i>' : '<i class="fa-solid fa-sun"></i>';
+    log(`Tema cambiato in modalità ${isLight ? "Chiara" : "Scura"}`);
   });
 }

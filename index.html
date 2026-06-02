@@ -6,6 +6,14 @@
   <title>CruciGen - Cruciverba Infiniti Professionali</title>
   <meta name="description" content="Generatore infinito di parole crociate e cruciverba professionali e simmetrici in italiano con definizioni accurate. Gioca offline gratis.">
   
+  <!-- PWA Manifest & Meta -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0f172a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="CruciGen">
+  <link rel="apple-touch-icon" href="icon.svg">
+  
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -28,13 +36,6 @@
       </div>
       
       <div class="controls-header">
-        <div class="size-selector">
-          <label for="grid-size-select"><i class="fa-solid fa-border-all"></i> Griglia:</label>
-          <select id="grid-size-select">
-            <option value="9x9">9 x 9 (Veloce)</option>
-            <option value="11x11" selected>11 x 11 (Medio)</option>
-          </select>
-        </div>
         
         <button id="btn-new" class="btn-primary">
           <i class="fa-solid fa-wand-magic-sparkles"></i> Nuovo Cruciverba
