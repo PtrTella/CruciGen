@@ -680,3 +680,102 @@ kbd {
     padding: 0.5rem;
   }
 }
+
+/* --- Console Section --- */
+.console-section {
+  max-width: 1200px;
+  width: 100%;
+  margin: 1.5rem auto 0 auto;
+  padding: 0 2rem;
+}
+
+.console-card {
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-sm);
+  background: hsla(222, 47%, 5%, 0.85); /* Deep dark background */
+}
+
+.console-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1.25rem;
+  background: hsla(223, 47%, 12%, 0.9);
+  border-bottom: 1px solid var(--border-color);
+  cursor: pointer;
+  user-select: none;
+}
+
+.console-header h3 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.console-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.btn-text {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding: 0.2rem 0.5rem;
+  cursor: pointer;
+}
+
+.btn-text:hover {
+  color: var(--error-color);
+}
+
+.console-header i {
+  color: var(--text-muted);
+  transition: transform var(--transition-fast);
+}
+
+.console-body {
+  max-height: 180px;
+  overflow-y: auto;
+  padding: 1rem 1.25rem;
+  transition: all var(--transition-normal);
+}
+
+.console-body.collapsed {
+  max-height: 0;
+  padding: 0 1.25rem;
+  overflow: hidden;
+  border-bottom: none;
+}
+
+#console-log-pre {
+  margin: 0;
+  padding: 0;
+  white-space: pre-wrap;
+  word-break: break-all;
+  font-family: 'Fira Code', 'Courier New', Courier, monospace;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: hsl(120, 80%, 65%); /* Terminal Green */
+  text-shadow: 0 0 4px hsla(120, 80%, 65%, 0.3);
+}
+
+body.light-mode .console-card {
+  background: hsl(210, 30%, 98%);
+}
+
+body.light-mode .console-header {
+  background: hsl(210, 30%, 93%);
+}
+
+body.light-mode #console-log-pre {
+  color: hsl(120, 70%, 25%); /* Dark green in light mode */
+  text-shadow: none;
+}
+

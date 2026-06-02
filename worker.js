@@ -3,21 +3,8 @@
 
 let dictionary = null;
 
-// Normalizes accented characters (just in case)
-function normalizeChar(c) {
-  const map = {
-    'À':'A','Á':'A','Â':'A','Ä':'A',
-    'È':'E','É':'E','Ê':'E','Ë':'E',
-    'Ì':'I','Í':'I','Î':'I','Ï':'I',
-    'Ò':'O','Ó':'O','Ô':'O','Ö':'O',
-    'Ù':'U','Ú':'U','Û':'U','Ü':'U',
-    'Ç':'C','Ñ':'N'
-  };
-  return map[c] || c;
-}
-
 self.onmessage = function(e) {
-  const { action, template, rows, cols, dict } = e.data;
+  const { action, template, dict } = e.data;
 
   if (action === "init") {
     dictionary = dict;
@@ -32,11 +19,7 @@ self.onmessage = function(e) {
     }
 
     try {
-      let gridTemplate = template;
-      if (template === "random" || !template) {
-        gridTemplate = createRandomSymmetricTemplate(rows || 11, cols || 11);
-      }
-      const result = generateCrossword(gridTemplate);
+      const result = generateCrossword(template);
       if (result) {
         self.postMessage({ status: "success", result });
       } else {
@@ -122,16 +105,16 @@ function generateCrossword(template) {
 
   // 3. Backtracking Solver with MRV and Randomization
   let steps = 0;
-  const maxSteps = 30000; // Limit steps to avoid hanging
+  const maxSteps = 10000; // Fast cutoff since templates are pre-validated
   const usedWords = new Set();
 
   function solve(slotIndex) {
     steps++;
-    if (steps > maxSteps) return false; // Hard cutoff
+    if (steps > maxSteps) return false;
 
     if (slotIndex === slots.length) return true;
 
-    // Pick slot with Minimum Remaining Values (MRV) among unfilled slots
+    // Pick slot with Minimum Remaining Values (MRV)
     let bestIdx = -1;
     let minCandidates = Infinity;
     let bestCandidates = [];
@@ -139,13 +122,11 @@ function generateCrossword(template) {
     for (let i = slotIndex; i < slots.length; i++) {
       const slot = slots[i];
       
-      // Get current pattern in the grid for this slot
       let pattern = "";
       for (const { r, c } of slot.patternIndices) {
         pattern += grid[r][c];
       }
 
-      // Find possible candidate words from dictionary
       const candidates = getCandidates(slot.length, pattern);
       if (candidates.length < minCandidates) {
         minCandidates = candidates.length;
@@ -202,7 +183,6 @@ function generateCrossword(template) {
     return false;
   }
 
-  // Helper to match pattern (e.g. "C A" -> matches "CASA")
   function getCandidates(len, pattern) {
     const lenStr = len.toString();
     if (!dictionary[lenStr]) return [];
@@ -225,7 +205,6 @@ function generateCrossword(template) {
     return candidates;
   }
 
-  // Shuffle in-place
   function shuffle(array) {
     for (let i = array.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -233,7 +212,7 @@ function generateCrossword(template) {
     }
   }
 
-  // Run solver (sort slots by length/intersections initially)
+  // Initial sort
   slots.sort((a, b) => b.length - a.length);
 
   const solved = solve(0);
@@ -266,7 +245,6 @@ function generateCrossword(template) {
     }
   });
 
-  // Sort clues by number
   horizontalClues.sort((a, b) => a.num - b.num);
   verticalClues.sort((a, b) => a.num - b.num);
 
@@ -275,136 +253,7 @@ function generateCrossword(template) {
     numberGrid,
     horizontalClues,
     verticalClues,
-    gridSize: { rows, cols }
+    gridSize: { rows, cols },
+    steps
   };
-}
-
-function createRandomSymmetricTemplate(rows, cols) {
-  const totalCells = rows * cols;
-  // Around 16-18% black cells density is standard and gives beautiful grids
-  const targetBlack = Math.floor(totalCells * 0.17); 
-  
-  let attempts = 0;
-  while (attempts < 1000) {
-    attempts++;
-    
-    // Create empty grid
-    const grid = Array(rows).fill(null).map(() => Array(cols).fill(' '));
-    
-    // Place black cells symmetrically
-    let blackPlaced = 0;
-    const maxPlacements = 150;
-    let placements = 0;
-    
-    while (blackPlaced < targetBlack && placements < maxPlacements) {
-      placements++;
-      const r = Math.floor(Math.random() * rows);
-      const c = Math.floor(Math.random() * cols);
-      
-      if (grid[r][c] === ' ') {
-        const symR = rows - 1 - r;
-        const symC = cols - 1 - c;
-        
-        grid[r][c] = '#';
-        grid[symR][symC] = '#';
-        
-        if (r === symR && c === symC) {
-          blackPlaced += 1;
-        } else {
-          blackPlaced += 2;
-        }
-      }
-    }
-    
-    // Validate slot lengths (all slots must be between 2 and 11)
-    if (validateTemplate(grid, rows, cols)) {
-      return grid.map(row => row.join(''));
-    }
-  }
-  
-  // Fallback to a very simple symmetric template if random generation fails
-  const fallback = Array(rows).fill(null).map((_, r) => {
-    let row = Array(cols).fill(' ');
-    // Simple diagonal pattern for fallback
-    if (r === Math.floor(rows / 2)) {
-      row[Math.floor(cols / 2)] = '#';
-    }
-    return row.join('');
-  });
-  return fallback;
-}
-
-function validateTemplate(grid, rows, cols) {
-  // Check horizontal slots lengths
-  for (let r = 0; r < rows; r++) {
-    let len = 0;
-    for (let c = 0; c < cols; c++) {
-      if (grid[r][c] !== '#') {
-        len++;
-      } else {
-        if (len > 0) {
-          if (len < 2 || len > 11) return false;
-          len = 0;
-        }
-      }
-    }
-    if (len > 0 && (len < 2 || len > 11)) return false;
-  }
-  
-  // Check vertical slots lengths
-  for (let c = 0; c < cols; c++) {
-    let len = 0;
-    for (let r = 0; r < rows; r++) {
-      if (grid[r][c] !== '#') {
-        len++;
-      } else {
-        if (len > 0) {
-          if (len < 2 || len > 11) return false;
-          len = 0;
-        }
-      }
-    }
-    if (len > 0 && (len < 2 || len > 11)) return false;
-  }
-  
-  // Check connectivity (flood fill from first white cell)
-  let startR = -1, startC = -1;
-  let whiteCount = 0;
-  for (let r = 0; r < rows; r++) {
-    for (let c = 0; c < cols; c++) {
-      if (grid[r][c] !== '#') {
-        whiteCount++;
-        if (startR === -1) {
-          startR = r;
-          startC = c;
-        }
-      }
-    }
-  }
-  
-  if (startR === -1) return false;
-  
-  const visited = Array(rows).fill(null).map(() => Array(cols).fill(false));
-  let filledCount = 0;
-  const queue = [[startR, startC]];
-  visited[startR][startC] = true;
-  
-  while (queue.length > 0) {
-    const [r, c] = queue.shift();
-    filledCount++;
-    
-    const dirs = [[-1, 0], [1, 0], [0, -1], [0, 1]];
-    for (const [dr, dc] of dirs) {
-      const nr = r + dr;
-      const nc = c + dc;
-      if (nr >= 0 && nr < rows && nc >= 0 && nc < cols) {
-        if (grid[nr][nc] !== '#' && !visited[nr][nc]) {
-          visited[nr][nc] = true;
-          queue.push([nr, nc]);
-        }
-      }
-    }
-  }
-  
-  return filledCount === whiteCount;
 }

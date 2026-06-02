@@ -24,11 +24,31 @@ const mobileClueText = document.getElementById("mobile-clue-text");
 
 // Initialize application
 window.addEventListener("DOMContentLoaded", () => {
-  initWorker();
   initTheme();
   setupEventListeners();
+  initWorker();
   loadDictionary();
 });
+
+// Custom Log utility
+function log(msg) {
+  const time = new Date().toLocaleTimeString();
+  const formatted = `[${time}] ${msg}`;
+  console.log(formatted);
+  
+  const pre = document.getElementById("console-log-pre");
+  if (pre) {
+    if (pre.textContent === "CruciGen System Initialized. Waiting for action...") {
+      pre.textContent = formatted;
+    } else {
+      pre.textContent += `\n${formatted}`;
+    }
+    const body = document.getElementById("console-body");
+    if (body) {
+      body.scrollTop = body.scrollHeight;
+    }
+  }
+}
 
 // Theme Management
 function initTheme() {
@@ -49,78 +69,108 @@ themeToggle.addEventListener("click", () => {
   document.body.classList.toggle("dark-mode", !isLight);
   localStorage.setItem("theme", isLight ? "light" : "dark");
   themeToggle.innerHTML = isLight ? '<i class="fa-solid fa-moon"></i>' : '<i class="fa-solid fa-sun"></i>';
+  log(`Tema cambiato in modalità ${isLight ? "Chiara" : "Scura"}`);
 });
+
+let generationAttempts = 0;
+const maxGenerationAttempts = 5;
 
 // Initialize Web Worker
 function initWorker() {
-  console.log("Initializing Worker...");
-  // Cache bust the worker to ensure updates are loaded
+  log("Inizializzazione Web Worker...");
   worker = new Worker("worker.js?v=" + new Date().getTime());
   
   worker.onerror = (err) => {
-    console.log("[WORKER ERROR]", err.message, "at", err.filename, ":", err.lineno);
+    log(`[WORKER ERROR] ${err.message} in ${err.filename}:${err.lineno}`);
   };
   
   worker.onmessage = (e) => {
     const { status, result, message } = e.data;
-    console.log("Received message from worker:", status);
+    log(`Messaggio ricevuto dal worker: status = "${status}"`);
     
     if (status === "ready") {
-      console.log("Worker dictionary initialized!");
+      log("Dizionario registrato nel Web Worker con successo!");
       dictionaryLoaded = true;
       generateNewCrossword();
     } else if (status === "success") {
-      console.log("Worker successfully generated grid!");
+      log(`Generazione completata con successo in ${result.steps} passi di backtracking!`);
       hideLoader();
       currentCrossword = result;
       renderGrid();
       renderClues();
       focusFirstCell();
     } else if (status === "failed") {
-      console.log("Worker failed to generate grid.");
-      hideLoader();
-      alert("Impossibile generare uno schema con i parametri attuali. Riprova.");
+      log(`[WARNING] Il risolutore ha fallito l'incastro per questo layout.`);
+      if (generationAttempts < maxGenerationAttempts) {
+        generationAttempts++;
+        log(`Tentativo di generazione #${generationAttempts + 1} con un layout/trasformazione alternativo...`);
+        generateNewCrossword(true);
+      } else {
+        log("[ERRORE] Raggiunto il limite massimo di tentativi di generazione.");
+        hideLoader();
+        alert("Impossibile generare lo schema. Riprova.");
+      }
     } else if (status === "error") {
-      console.log("Worker reported error:", message);
+      log(`[WORKER CRITICAL ERROR] ${message}`);
       hideLoader();
-      alert("Errore durante la generazione dello schema.");
+      alert("Errore critico durante la generazione dello schema.");
     }
   };
 }
 
 // Load Dictionary JSON
 async function loadDictionary() {
-  console.log("Loading dictionary.json...");
+  log("Avvio caricamento dizionario (dictionary.json)...");
   showLoader("Caricamento dizionario italiano...");
   try {
-    // Cache bust dictionary fetch
     const response = await fetch("dictionary.json?v=" + new Date().getTime());
-    console.log("Response status:", response.status);
+    log(`Stato risposta fetch dizionario: ${response.status}`);
     const dict = await response.json();
-    console.log("Loaded dictionary entries count:", Object.keys(dict).length);
+    
+    let totalWords = 0;
+    for (const len in dict) {
+      totalWords += Object.keys(dict[len]).length;
+    }
+    log(`Dizionario caricato. Totale parole indicizzate: ${totalWords}`);
+    
     worker.postMessage({ action: "init", dict });
   } catch (err) {
-    console.log("Failed to load dictionary:", err);
+    log(`[ERRORE DIZIONARIO] ${err.message}`);
     loaderText.innerText = "Errore nel caricamento del dizionario.";
   }
 }
 
 // Generate crossword
-function generateNewCrossword() {
+function generateNewCrossword(isRetry = false) {
   if (!dictionaryLoaded) {
-    console.log("Cannot generate crossword: dictionary not loaded yet");
+    log("Impossibile generare: dizionario non caricato.");
     return;
   }
   showLoader("Generazione schema in corso...");
   
-  const size = selectSize.value;
-  console.log("Selected size for generation:", size);
-  const parts = size.split('x');
-  const rows = parseInt(parts[0]);
-  const cols = parseInt(parts[1]);
+  if (!isRetry) {
+    generationAttempts = 0;
+  }
   
-  console.log(`Sending generate command for random ${rows}x${cols} template`);
-  worker.postMessage({ action: "generate", template: "random", rows: rows, cols: cols });
+  const size = selectSize.value;
+  log(`--- INIZIO GENERAZIONE (${size}) ---`);
+  
+  const list = window.TEMPLATES[size];
+  if (!list || list.length === 0) {
+    log(`[ERRORE] Nessun template disponibile per la dimensione ${size}`);
+    return;
+  }
+  
+  // Select a random base template
+  const templateObj = list[Math.floor(Math.random() * list.length)];
+  log(`Selezionato template base: "${templateObj.name}"`);
+  
+  // Apply a random symmetry transformation (rotation/mirroring)
+  const transformedGrid = window.getRandomTransformation(templateObj.grid);
+  log(`Applicata trasformazione geometrica per variare il layout.`);
+  
+  log("Invio layout al Web Worker per la risoluzione...");
+  worker.postMessage({ action: "generate", template: transformedGrid });
 }
 
 // Loader controls
@@ -168,7 +218,6 @@ function renderGrid() {
         inputEl.dataset.row = r;
         inputEl.dataset.col = c;
         
-        // Disable spellcheck and autocomplete
         inputEl.setAttribute("autocomplete", "off");
         inputEl.setAttribute("autocorrect", "off");
         inputEl.setAttribute("spellcheck", "false");
@@ -308,7 +357,6 @@ function moveFocus(dr, dc) {
   let nr = activeCell.r + dr;
   let nc = activeCell.c + dc;
   
-  // Find next non-black cell in the direction
   while (nr >= 0 && nr < rows && nc >= 0 && nc < cols) {
     if (currentCrossword.solution[nr][nc] !== "#") {
       activeCell = { r: nr, c: nc };
@@ -353,7 +401,10 @@ function setupEventListeners() {
     }
     
     if (anyFilled && allCorrect) {
+      log("Cruciverba risolto con successo!");
       alert("Complimenti! Hai completato correttamente il cruciverba! 🎉");
+    } else {
+      log("Verifica completata: presenti errori o lettere mancanti.");
     }
   });
   
@@ -361,6 +412,7 @@ function setupEventListeners() {
     if (confirm("Vuoi davvero svuotare lo schema corrente?")) {
       document.querySelectorAll(".cell-input").forEach(input => input.value = "");
       updateHighlights(activeCell.r, activeCell.c);
+      log("Griglia svuotata.");
     }
   });
   
@@ -376,10 +428,11 @@ function setupEventListeners() {
         }
       }
       updateHighlights(activeCell.r, activeCell.c);
+      log("Soluzione dello schema rivelata.");
     }
   });
   
-  // Delegation of events on the grid
+  // Grid delegation
   gridContainer.addEventListener("click", (e) => {
     const input = e.target.closest(".cell-input");
     if (!input) return;
@@ -388,7 +441,6 @@ function setupEventListeners() {
     const c = parseInt(input.dataset.col);
     
     if (activeCell.r === r && activeCell.c === c) {
-      // Toggle direction if clicking already active cell
       activeDirection = activeDirection === "H" ? "V" : "H";
     } else {
       activeCell = { r, c };
@@ -400,10 +452,8 @@ function setupEventListeners() {
     const input = e.target;
     if (!input.classList.contains("cell-input")) return;
     
-    // Auto-normalize text to upper-case
     input.value = input.value.toUpperCase();
     
-    // Move to next cell in active direction
     if (input.value) {
       if (activeDirection === "H") {
         moveFocus(0, 1);
@@ -440,13 +490,11 @@ function setupEventListeners() {
       case "Backspace":
         if (!input.value) {
           e.preventDefault();
-          // Move back first
           if (activeDirection === "H") {
             moveFocus(0, -1);
           } else {
             moveFocus(-1, 0);
           }
-          // Clear that focused cell
           const prevInput = document.querySelector(`.cell-input[data-row="${activeCell.r}"][data-col="${activeCell.c}"]`);
           if (prevInput) prevInput.value = "";
         }
@@ -457,5 +505,22 @@ function setupEventListeners() {
         updateHighlights(r, c);
         break;
     }
+  });
+
+  // Console Panel Toggle
+  const consoleHeader = document.getElementById("console-header-toggle");
+  const consoleBody = document.getElementById("console-body");
+  const consoleIcon = document.getElementById("console-toggle-icon");
+  const btnClearConsole = document.getElementById("btn-clear-console");
+  
+  consoleHeader.addEventListener("click", () => {
+    const isCollapsed = consoleBody.classList.toggle("collapsed");
+    consoleIcon.className = isCollapsed ? "fa-solid fa-chevron-up" : "fa-solid fa-chevron-down";
+  });
+  
+  btnClearConsole.addEventListener("click", (e) => {
+    e.stopPropagation(); // prevent collapse
+    const pre = document.getElementById("console-log-pre");
+    if (pre) pre.textContent = "[Console svuotata]";
   });
 }

@@ -115,6 +115,21 @@
 
     </div>
   </main>
+  <!-- Console Debug Panel -->
+  <section class="console-section" aria-label="Console di Sistema">
+    <div class="card console-card">
+      <div class="console-header" id="console-header-toggle">
+        <h3><i class="fa-solid fa-terminal"></i> Console di Sistema</h3>
+        <div class="console-actions">
+          <button id="btn-clear-console" class="btn-text" title="Pulisci log"><i class="fa-solid fa-trash-can"></i> Pulisci</button>
+          <i class="fa-solid fa-chevron-up" id="console-toggle-icon"></i>
+        </div>
+      </div>
+      <div class="console-body collapsed" id="console-body">
+        <pre id="console-log-pre">CruciGen System Initialized. Waiting for action...</pre>
+      </div>
+    </div>
+  </section>
 
   <!-- Help & Keyboard info footer -->
   <footer>
