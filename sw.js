@@ -53,9 +53,9 @@ self.addEventListener("fetch", (e) => {
         if (
           networkResponse.status === 200 &&
           (e.request.url.startsWith(self.location.origin) ||
-           e.request.url.startsWith("https://fonts.googleapis.com") ||
-           e.request.url.startsWith("https://fonts.gstatic.com") ||
-           e.request.url.startsWith("https://cdnjs.cloudflare.com"))
+            e.request.url.startsWith("https://fonts.googleapis.com") ||
+            e.request.url.startsWith("https://fonts.gstatic.com") ||
+            e.request.url.startsWith("https://cdnjs.cloudflare.com"))
         ) {
           const responseClone = networkResponse.clone();
           caches.open(CACHE_NAME).then((cache) => {

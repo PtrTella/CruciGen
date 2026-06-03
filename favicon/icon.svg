@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" rx="115" fill="#F4F7FC" />
+
+  <g transform="translate(0, 10)" fill="#D9E2EC">
+    <rect x="206" y="94" width="100" height="100" rx="25" />
+    <rect x="94" y="206" width="100" height="100" rx="25" />
+    <rect x="206" y="206" width="100" height="100" rx="25" />
+    <rect x="318" y="206" width="100" height="100" rx="25" />
+    <rect x="206" y="318" width="100" height="100" rx="25" />
+  </g>
+
+  <rect x="206" y="94" width="100" height="100" rx="25" fill="#FF6B6B" /> <rect x="94" y="206" width="100" height="100" rx="25" fill="#4ECDC4" /> <rect x="206" y="206" width="100" height="100" rx="25" fill="#FFFFFF" /> <rect x="318" y="206" width="100" height="100" rx="25" fill="#FFD166" /> <rect x="206" y="318" width="100" height="100" rx="25" fill="#9D4EDD" /> <g font-family="system-ui, -apple-system, sans-serif" font-size="64" font-weight="900" fill="#FFFFFF" text-anchor="middle">
+    <text x="256" y="166">C</text>
+    <text x="144" y="278">R</text>
+    <text x="368" y="278">U</text>
+    <text x="256" y="390">X</text>
+  </g>
+
+  <g>
+    <circle cx="236" cy="244" r="7" fill="#2B2D42" />
+    <circle cx="276" cy="244" r="7" fill="#2B2D42" />
+    <ellipse cx="220" cy="256" rx="9" ry="6" fill="#FF8A8A" opacity="0.6" />
+    <ellipse cx="292" cy="256" rx="9" ry="6" fill="#FF8A8A" opacity="0.6" />
+    <path d="M 244 256 Q 256 272 268 256" fill="none" stroke="#2B2D42" stroke-width="5" stroke-linecap="round" />
+  </g>
+
+  <path d="M 144,124 C 144,136 136,144 124,144 C 136,144 144,152 144,164 C 144,152 152,144 164,144 C 152,144 144,136 144,124 Z" fill="#FFD166" />
+  <path d="M 368,124 C 368,136 360,144 348,144 C 360,144 368,152 368,164 C 368,152 376,144 388,144 C 376,144 368,136 368,124 Z" fill="#4ECDC4" />
+  <path d="M 144,348 C 144,360 136,368 124,368 C 136,368 144,376 144,388 C 144,376 152,368 164,368 C 152,368 144,360 144,348 Z" fill="#9D4EDD" />
+  <path d="M 368,348 C 368,360 360,368 348,368 C 360,368 368,376 368,388 C 368,376 376,368 388,368 C 376,368 368,360 368,348 Z" fill="#FF6B6B" />
+</svg>
