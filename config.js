@@ -1,26 +1,37 @@
 // config.js
-// Configurazione globale condivisa per CruciGen (utilizzabile dal thread principale e dal Web Worker)
+
+// Generatore matematico della Curva Gaussiana
+function generateGaussScores() {
+  const scores = {};
+
+  // Parametri della campana
+  const peakHeight = 45; // Altezza massima della campana (Punteggio max)
+  const center = 7.5;    // Centro della campana (esattamente tra 7 e 8)
+  const width = 8;       // "Ampiezza" della campana (più è alto, più 5 e 10 prendono punti)
+
+  for (let len = 1; len <= 15; len++) {
+    // Formula della Distribuzione Normale (Gaussiana)
+    let score = Math.round(peakHeight * Math.exp(-Math.pow(len - center, 2) / width));
+
+    // Abbassiamo l'asse X di 10 punti per far andare in negativo le code
+    score -= 10;
+
+    // Regole di sicurezza assolute (Overrides)
+    if (len === 2) score = -25;  // Penalità fissa per le 2 lettere (troppo rischiose per stalli)
+    if (len >= 13) score -= 10;  // Extra malus per 13+ (il dizionario ne ha pochissime)
+
+    scores[len] = score;
+  }
+
+  return scores;
+}
 
 const CRUCIGEN_CONFIG = {
-  maxSteps: 8000,
-  blackSquareTargetMultiplier: 0.17,
-  lengthScores: {
-    1: -150,
-    2: -15,
-    3: -3,
-    4: 5,
-    5: 25,
-    6: 25,
-    7: 15,
-    8: 10,
-    9: 5,
-    10: 2,
-    11: 0,
-    12: 0,
-    13: 0,
-    14: 0,
-    15: 0
-  }
+  maxSteps: 4000,
+  blackSquareTargetMultiplier: 0.18,
+
+  // Esegue la funzione matematica e salva la mappa pre-calcolata
+  lengthScores: generateGaussScores()
 };
 
 // Rendiamo l'oggetto accessibile globalmente nei diversi contesti

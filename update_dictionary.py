@@ -205,7 +205,7 @@ class DictionaryUpdater:
 
         # Return links to other clue pages to grow queue
         links = re.findall(r'href="(/it/cruciverba/\d+)"', html_content)
-        return [f"https://www.dizy.com{l}" for l in links], added
+        return [f"https://www.dizy.com{link}" for link in links], added
 
     def update_by_words(self, words):
         print(f"Updating by looking up {len(words)} custom words on Dizy...")
@@ -249,8 +249,8 @@ class DictionaryUpdater:
             res = self.fetch_url(s)
             if res:
                 links = re.findall(r'href="(/it/cruciverba/\d+)"', res)
-                for l in links:
-                    queue.add(f"https://www.dizy.com{l}")
+                for link in links:
+                    queue.add(f"https://www.dizy.com{link}")
 
         print(
             f"Found {len(queue)} initial links. Crawling up to {target_pages} clue pages..."
@@ -275,7 +275,7 @@ class DictionaryUpdater:
                         new_links, added = res
                         if added:
                             added_count += 1
-                        queue.update([l for l in new_links if l not in visited])
+                        queue.update([link for link in new_links if link not in visited])
 
             pages_crawled += len(batch)
             print(

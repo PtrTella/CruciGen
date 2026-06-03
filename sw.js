@@ -1,5 +1,5 @@
 // sw.js - Service Worker for CruciGen offline gaming and PWA support
-const CACHE_NAME = "crucigen-cache-v3";
+const CACHE_NAME = "crucigen-cache-v4";
 const ASSETS = [
   "./",
   "./index.html",
@@ -8,7 +8,13 @@ const ASSETS = [
   "./templates.js",
   "./worker.js",
   "./dictionary.json",
-  "./icon.svg",
+  "./favicon/favicon.ico",
+  "./favicon/favicon-16x16.png",
+  "./favicon/favicon-32x32.png",
+  "./favicon/apple-touch-icon.png",
+  "./favicon/android-chrome-192x192.png",
+  "./favicon/android-chrome-512x512.png",
+  "./favicon/icon.svg",
   "./manifest.json"
 ];
 
