@@ -80,7 +80,7 @@ function log(msg) {
 // Theme Management
 // Theme Management
 function initTheme() {
-  let savedTheme = "dark";
+  let savedTheme = "light";
   try {
     savedTheme = localStorage.getItem("theme") || "dark";
   } catch (e) {
@@ -316,7 +316,7 @@ function updateHighlights(row, col) {
       }
     }
 
-     // Highlight list item
+    // Highlight list item
     const listId = activeDirection === "H" ? "clues-horizontal-list" : "clues-vertical-list";
     const clueLi = document.querySelector(`#${listId} li[data-num="${currentClue.num}"]`);
     if (clueLi) {
@@ -489,7 +489,7 @@ function setupEventListeners() {
         isTyping = false;
         return;
       }
-      
+
       // Se la casella conteneva una lettera prima della cancellazione, svuotala e basta
       if (oldVal) {
         input.value = "";
@@ -497,7 +497,7 @@ function setupEventListeners() {
         isTyping = false;
         return;
       }
-      
+
       // Se era già vuota, torna indietro di una casella e svuotala
       input.value = "";
       if (activeDirection === "H") {
