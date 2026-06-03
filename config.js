@@ -17,6 +17,7 @@ function generateGaussScores() {
     score -= 10;
 
     // Regole di sicurezza assolute (Overrides)
+    if (len === 1) score = -150; // Mai singole lettere isolate
     if (len === 2) score = -25;  // Penalità fissa per le 2 lettere (troppo rischiose per stalli)
     if (len >= 13) score -= 10;  // Extra malus per 13+ (il dizionario ne ha pochissime)
 
@@ -27,8 +28,9 @@ function generateGaussScores() {
 }
 
 const CRUCIGEN_CONFIG = {
-  maxSteps: 4000,
-  blackSquareTargetMultiplier: 0.18,
+  maxSteps: 3000,
+  blackSquareTargetMultiplier: 0.17,
+  maxGenerationAttempts: 10,
 
   // Esegue la funzione matematica e salva la mappa pre-calcolata
   lengthScores: generateGaussScores()

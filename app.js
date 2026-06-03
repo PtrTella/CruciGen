@@ -97,7 +97,6 @@ function initTheme() {
 }
 
 let generationAttempts = 0;
-const maxGenerationAttempts = 5;
 
 // Initialize Web Worker
 function initWorker() {
@@ -125,7 +124,8 @@ function initWorker() {
       focusFirstCell();
     } else if (status === "failed") {
       log(`[WARNING] Il risolutore ha fallito l'incastro per questo layout.`);
-      if (generationAttempts < maxGenerationAttempts) {
+      const maxAtt = (typeof CRUCIGEN_CONFIG !== 'undefined' && CRUCIGEN_CONFIG.maxGenerationAttempts) || 5;
+      if (generationAttempts < maxAtt) {
         generationAttempts++;
         log(`Tentativo di generazione #${generationAttempts + 1} con un layout/trasformazione alternativo...`);
         generateNewCrossword(true);
