@@ -415,9 +415,8 @@ function generateCrossword(template) {
   const verticalClues = [];
 
   slots.forEach(slot => {
-    const dictInfo = dictionary[slot.length.toString()][slot.word];
-    const clueText = dictInfo ? dictInfo[0] : "Nessuna definizione disponibile.";
-    const originalWord = dictInfo ? dictInfo[1] : slot.word.toLowerCase();
+    const clueText = dictionary[slot.length.toString()][slot.word] || "Nessuna definizione disponibile.";
+    const originalWord = slot.word;
 
     const clueObj = {
       num: slot.num,

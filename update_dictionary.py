@@ -91,7 +91,7 @@ class DictionaryUpdater:
 
         with open(DICTIONARY_PATH, "w", encoding="utf-8") as f:
             json.dump(final_dict, f, ensure_ascii=False, indent=2)
-        
+
         print("\n=== SUMMARY OF UPDATES ===")
         print(f"{'Length':<8} | {'Added':<8} | {'Total in Dict':<12}")
         print("-" * 35)
@@ -107,30 +107,6 @@ class DictionaryUpdater:
         if not word_clean.isalpha() or len(word_clean) < 2 or len(word_clean) > 15:
             return False
 
-        # Filter verb conjugations
-        word_lower = word.lower()
-        if word_lower.endswith(
-            (
-                "ano",
-                "ono",
-                "iamo",
-                "ate",
-                "ete",
-                "ite",
-                "ava",
-                "eva",
-                "iva",
-                "avo",
-                "evo",
-                "ivo",
-                "eranno",
-                "erebbero",
-                "erò",
-                "erà",
-            )
-        ):
-            return False
-
         word_len = str(len(word_clean))
         with self.lock:
             if word_len not in self.dictionary:
@@ -139,12 +115,12 @@ class DictionaryUpdater:
             # If word already exists, only update if overwrite is enabled or if new clue is significantly shorter/better
             if word_clean in self.dictionary[word_len]:
                 if overwrite:
-                    self.dictionary[word_len][word_clean] = [clue, word]
+                    self.dictionary[word_len][word_clean] = clue
                     self.added_by_length[word_len] += 1
                     return True
                 return False  # Skip duplicate
             else:
-                self.dictionary[word_len][word_clean] = [clue, word]
+                self.dictionary[word_len][word_clean] = clue
                 self.added_by_length[word_len] += 1
                 return True
 
@@ -275,7 +251,9 @@ class DictionaryUpdater:
                         new_links, added = res
                         if added:
                             added_count += 1
-                        queue.update([link for link in new_links if link not in visited])
+                        queue.update(
+                            [link for link in new_links if link not in visited]
+                        )
 
             pages_crawled += len(batch)
             print(
