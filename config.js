@@ -28,15 +28,17 @@ function generateGaussScores() {
 }
 
 const CRUCIGEN_CONFIG = {
-  maxSteps: 2000,
-  blackSquareTargetMultiplier: 0.17,
-  maxGenerationAttempts: 30,
-  gridTopologyCandidates: 200,
-  blackSquarePenalty: 20,
-  candidateJitterWindow: 80,
-
-  // Esegue la funzione matematica e salva la mappa pre-calcolata
-  lengthScores: generateGaussScores()
+  maxGenerationAttempts: 30,          // Max tentativi rigenerazione layout
+  gridTopologyCandidates: 200,        // Candidati topologia valutati
+  maxStepsBySize: {                   // Passi backtracking per dimensione
+    9: 1000,                          // 9x9
+    11: 2000,                         // 11x11
+    13: 4500,                         // 13x13
+    15: 8000                          // 15x15
+  },
+  candidateJitterWindow: 80,          // Parole top rimescolate per varietà
+  blackSquareTargetMultiplier: 0.17,  // % ideale caselle nere (0.17 = 17%)
+  lengthScores: generateGaussScores() // Punteggi lunghezze parole (Gaussiana)
 };
 
 // Rendiamo l'oggetto accessibile globalmente nei diversi contesti
