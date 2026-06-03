@@ -5,6 +5,8 @@ let currentCrossword = null; // Store output from solver
 let activeCell = { r: 0, c: 0 };
 let activeDirection = "H"; // "H" = Orizzontali, "V" = Verticali
 let dictionaryLoaded = false;
+let isTyping = false;
+
 
 // DOM Elements
 let gridContainer, selectSize, btnNew, btnVerify, btnClear, btnReveal, themeToggle, loader, loaderText, listHorizontal, listVertical, mobileClueBar, mobileBadge, mobileClueText;
@@ -312,12 +314,12 @@ function updateHighlights(row, col) {
       }
     }
 
-    // Highlight list item
+     // Highlight list item
     const listId = activeDirection === "H" ? "clues-horizontal-list" : "clues-vertical-list";
     const clueLi = document.querySelector(`#${listId} li[data-num="${currentClue.num}"]`);
     if (clueLi) {
       clueLi.classList.add("highlight-active-clue");
-      if (window.innerWidth > 768) {
+      if (window.innerWidth > 768 && !isTyping) {
         clueLi.scrollIntoView({ block: "nearest", behavior: "smooth" });
       }
     }
@@ -457,7 +459,35 @@ function setupEventListeners() {
     const input = e.target;
     if (!input.classList.contains("cell-input")) return;
 
-    input.value = input.value.toUpperCase();
+    // Handle Space bar toggle logic (both PC and mobile keyboards)
+    if (e.data === " " || input.value === " ") {
+      input.value = "";
+      activeDirection = activeDirection === "H" ? "V" : "H";
+      updateHighlights(parseInt(input.dataset.row), parseInt(input.dataset.col));
+      return;
+    }
+
+    isTyping = true;
+
+    // Support backspace via inputType on mobile keyboards
+    if (e.inputType === "deleteContentBackward" || e.inputType === "deleteContentForward") {
+      input.value = "";
+      if (activeDirection === "H") {
+        moveFocus(0, -1);
+      } else {
+        moveFocus(-1, 0);
+      }
+      const prevInput = document.querySelector(`.cell-input[data-row="${activeCell.r}"][data-col="${activeCell.c}"]`);
+      if (prevInput) {
+        prevInput.value = "";
+      }
+      isTyping = false;
+      return;
+    }
+
+    // Sanitize value (uppercase, remove spaces, keep only first char)
+    let val = input.value.trim().toUpperCase().replace(/\s/g, "");
+    input.value = val.substring(0, 1);
 
     if (input.value) {
       if (activeDirection === "H") {
@@ -466,6 +496,7 @@ function setupEventListeners() {
         moveFocus(1, 0);
       }
     }
+    isTyping = false;
   });
 
   gridContainer.addEventListener("keydown", (e) => {
@@ -493,6 +524,7 @@ function setupEventListeners() {
         moveFocus(-1, 0);
         break;
       case "Backspace":
+        // PC Sincronizzazione: if field is already empty, go backward and clear
         if (!input.value) {
           e.preventDefault();
           if (activeDirection === "H") {
@@ -511,6 +543,36 @@ function setupEventListeners() {
         break;
     }
   });
+
+  // Mobile Clue Bar Direction Toggle button
+  const btnToggleDirMobile = document.getElementById("btn-toggle-direction-mobile");
+  if (btnToggleDirMobile) {
+    btnToggleDirMobile.addEventListener("click", (e) => {
+      e.stopPropagation();
+      activeDirection = activeDirection === "H" ? "V" : "H";
+      updateHighlights(activeCell.r, activeCell.c);
+      log(`Direzione cambiata a: ${activeDirection === "H" ? "Orizzontali" : "Verticali"}`);
+    });
+  }
+
+  // Adjust mobile clue bar location dynamically above keyboard
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener("resize", () => {
+      const clueBar = document.getElementById("mobile-clue-bar");
+      if (clueBar && window.innerWidth <= 600) {
+        const height = window.visualViewport.height;
+        clueBar.style.position = "fixed";
+        clueBar.style.bottom = `${window.innerHeight - height}px`;
+        clueBar.style.left = "0";
+        clueBar.style.right = "0";
+        clueBar.style.borderRadius = "0";
+        clueBar.style.borderLeft = "none";
+        clueBar.style.borderRight = "none";
+        clueBar.style.width = "100vw";
+        clueBar.style.boxShadow = "0 -4px 10px rgba(0,0,0,0.15)";
+      }
+    });
+  }
 
   // Console Panel Toggle
   const consoleHeader = document.getElementById("console-header-toggle");

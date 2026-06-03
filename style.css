@@ -356,6 +356,7 @@ main {
   outline: none;
   cursor: pointer;
   padding-top: clamp(2px, 1.5vw, 6px);
+  touch-action: manipulation;
 }
 
 /* Cell State Highlights */
@@ -407,6 +408,27 @@ main {
   gap: 0.75rem;
   font-size: 0.95rem;
   box-shadow: var(--shadow-sm);
+}
+
+.btn-toggle-dir {
+  background: var(--accent-light);
+  color: var(--accent-color);
+  border: 1px solid var(--border-color);
+  border-radius: 50%;
+  width: 2.2rem;
+  height: 2.2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.btn-toggle-dir:hover {
+  background: var(--accent-color);
+  color: white;
 }
 
 .clue-direction-badge {
@@ -640,6 +662,10 @@ kbd {
 }
 
 @media (max-width: 600px) {
+  .cell-input {
+    font-size: 16px !important;
+  }
+
   .clues-container {
     grid-template-columns: 1fr;
   }
