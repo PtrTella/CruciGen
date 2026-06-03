@@ -6,6 +6,7 @@ let activeCell = { r: 0, c: 0 };
 let activeDirection = "H"; // "H" = Orizzontali, "V" = Verticali
 let dictionaryLoaded = false;
 let isTyping = false;
+let backspaceProcessedInKeydown = false;
 
 
 // DOM Elements
@@ -218,10 +219,11 @@ function renderGrid() {
 
         const inputEl = document.createElement("input");
         inputEl.type = "text";
-        inputEl.maxLength = 1;
+        inputEl.maxLength = 2;
         inputEl.classList.add("cell-input");
         inputEl.dataset.row = r;
         inputEl.dataset.col = c;
+        inputEl.dataset.oldVal = "";
 
         inputEl.setAttribute("autocomplete", "off");
         inputEl.setAttribute("autocorrect", "off");
@@ -417,7 +419,10 @@ function setupEventListeners() {
 
   btnClear.addEventListener("click", () => {
     if (confirm("Vuoi davvero svuotare lo schema corrente?")) {
-      document.querySelectorAll(".cell-input").forEach(input => input.value = "");
+      document.querySelectorAll(".cell-input").forEach(input => {
+        input.value = "";
+        input.dataset.oldVal = "";
+      });
       updateHighlights(activeCell.r, activeCell.c);
       log("Griglia svuotata.");
     }
@@ -431,15 +436,14 @@ function setupEventListeners() {
           if (currentCrossword.solution[r][c] !== "#") {
             const input = document.querySelector(`.cell-input[data-row="${r}"][data-col="${c}"]`);
             input.value = currentCrossword.solution[r][c];
+            input.dataset.oldVal = currentCrossword.solution[r][c];
           }
         }
       }
       updateHighlights(activeCell.r, activeCell.c);
       log("Soluzione dello schema rivelata.");
     }
-  });
-
-  // Grid delegation
+  })  // Grid delegation
   gridContainer.addEventListener("click", (e) => {
     const input = e.target.closest(".cell-input");
     if (!input) return;
@@ -452,16 +456,26 @@ function setupEventListeners() {
     } else {
       activeCell = { r, c };
     }
+    input.setSelectionRange(input.value.length, input.value.length);
     updateHighlights(r, c);
+  });
+
+  gridContainer.addEventListener("focusin", (e) => {
+    const input = e.target;
+    if (input.classList.contains("cell-input")) {
+      input.setSelectionRange(input.value.length, input.value.length);
+    }
   });
 
   gridContainer.addEventListener("input", (e) => {
     const input = e.target;
     if (!input.classList.contains("cell-input")) return;
 
+    const oldVal = input.dataset.oldVal || "";
+
     // Handle Space bar toggle logic (both PC and mobile keyboards)
-    if (e.data === " " || input.value === " ") {
-      input.value = "";
+    if (e.data === " " || input.value === oldVal + " " || input.value === " ") {
+      input.value = oldVal;
       activeDirection = activeDirection === "H" ? "V" : "H";
       updateHighlights(parseInt(input.dataset.row), parseInt(input.dataset.col));
       return;
@@ -471,6 +485,20 @@ function setupEventListeners() {
 
     // Support backspace via inputType on mobile keyboards
     if (e.inputType === "deleteContentBackward" || e.inputType === "deleteContentForward") {
+      if (backspaceProcessedInKeydown) {
+        isTyping = false;
+        return;
+      }
+      
+      // Se la casella conteneva una lettera prima della cancellazione, svuotala e basta
+      if (oldVal) {
+        input.value = "";
+        input.dataset.oldVal = "";
+        isTyping = false;
+        return;
+      }
+      
+      // Se era già vuota, torna indietro di una casella e svuotala
       input.value = "";
       if (activeDirection === "H") {
         moveFocus(0, -1);
@@ -480,14 +508,26 @@ function setupEventListeners() {
       const prevInput = document.querySelector(`.cell-input[data-row="${activeCell.r}"][data-col="${activeCell.c}"]`);
       if (prevInput) {
         prevInput.value = "";
+        prevInput.dataset.oldVal = "";
       }
       isTyping = false;
       return;
     }
 
-    // Sanitize value (uppercase, remove spaces, keep only first char)
+    // Sanitize value (uppercase, remove spaces)
     let val = input.value.trim().toUpperCase().replace(/\s/g, "");
-    input.value = val.substring(0, 1);
+    if (val.length > 1) {
+      // Se si scrive su una cella già riempita, sovrascrivi con l'ultimo carattere digitato
+      if (val.startsWith(oldVal)) {
+        val = val.substring(oldVal.length);
+      } else if (val.endsWith(oldVal)) {
+        val = val.substring(0, val.length - oldVal.length);
+      } else {
+        val = val.substring(val.length - 1);
+      }
+    }
+    input.value = val;
+    input.dataset.oldVal = val;
 
     if (input.value) {
       if (activeDirection === "H") {
@@ -524,16 +564,27 @@ function setupEventListeners() {
         moveFocus(-1, 0);
         break;
       case "Backspace":
-        // PC Sincronizzazione: if field is already empty, go backward and clear
-        if (!input.value) {
-          e.preventDefault();
+        e.preventDefault();
+        backspaceProcessedInKeydown = true;
+        setTimeout(() => {
+          backspaceProcessedInKeydown = false;
+        }, 0);
+
+        const currentVal = input.value;
+        if (currentVal) {
+          input.value = "";
+          input.dataset.oldVal = "";
+        } else {
           if (activeDirection === "H") {
             moveFocus(0, -1);
           } else {
             moveFocus(-1, 0);
           }
           const prevInput = document.querySelector(`.cell-input[data-row="${activeCell.r}"][data-col="${activeCell.c}"]`);
-          if (prevInput) prevInput.value = "";
+          if (prevInput) {
+            prevInput.value = "";
+            prevInput.dataset.oldVal = "";
+          }
         }
         break;
       case " ":
@@ -541,6 +592,46 @@ function setupEventListeners() {
         activeDirection = activeDirection === "H" ? "V" : "H";
         updateHighlights(r, c);
         break;
+    }
+  });
+
+  // Previeni menu contestuale (copia/incolla/condividi) sulle caselle
+  gridContainer.addEventListener("contextmenu", (e) => {
+    if (e.target.classList.contains("cell-input")) {
+      e.preventDefault();
+    }
+  });
+
+  // Impedisce la selezione nativa del testo per bloccare i popup di sistema
+  gridContainer.addEventListener("select", (e) => {
+    if (e.target.classList.contains("cell-input")) {
+      e.preventDefault();
+      e.target.selectionStart = e.target.selectionEnd;
+    }
+  });
+
+  gridContainer.addEventListener("selectstart", (e) => {
+    if (e.target.classList.contains("cell-input")) {
+      e.preventDefault();
+    }
+  });
+
+  // Intercetta eventi prima dell'inserimento per prevenire incollaggi nativi
+  gridContainer.addEventListener("beforeinput", (e) => {
+    if (e.target.classList.contains("cell-input")) {
+      if (e.inputType === "insertFromPaste" || e.inputType === "insertFromDrop") {
+        e.preventDefault();
+      }
+    }
+  });
+
+  // Listener globale per prevenire visualizzazione dei popup iOS/Android
+  document.addEventListener("selectionchange", () => {
+    const active = document.activeElement;
+    if (active && active.classList.contains("cell-input")) {
+      if (active.selectionStart !== active.selectionEnd) {
+        active.selectionStart = active.selectionEnd;
+      }
     }
   });
 

@@ -358,6 +358,12 @@ main {
   padding-top: clamp(2px, 1.5vw, 6px);
   touch-action: manipulation;
   min-width: 0;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 
 /* Cell State Highlights */
