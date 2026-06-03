@@ -7,11 +7,12 @@ let activeDirection = "H"; // "H" = Orizzontali, "V" = Verticali
 let dictionaryLoaded = false;
 
 // DOM Elements
-let gridContainer, btnNew, btnVerify, btnClear, btnReveal, themeToggle, loader, loaderText, listHorizontal, listVertical, mobileClueBar, mobileBadge, mobileClueText;
+let gridContainer, selectSize, btnNew, btnVerify, btnClear, btnReveal, themeToggle, loader, loaderText, listHorizontal, listVertical, mobileClueBar, mobileBadge, mobileClueText;
 
 // Initialize application
 function initApp() {
   gridContainer = document.getElementById("crossword-grid-container");
+  selectSize = document.getElementById("select-size");
   btnNew = document.getElementById("btn-new");
   btnVerify = document.getElementById("btn-verify");
   btnClear = document.getElementById("btn-clear");
@@ -58,7 +59,7 @@ function log(msg) {
   const time = new Date().toLocaleTimeString();
   const formatted = `[${time}] ${msg}`;
   console.log(formatted);
-  
+
   const pre = document.getElementById("console-log-pre");
   if (pre) {
     if (pre.textContent === "CruciGen System Initialized. Waiting for action...") {
@@ -73,6 +74,7 @@ function log(msg) {
   }
 }
 
+// Theme Management
 // Theme Management
 function initTheme() {
   let savedTheme = "dark";
@@ -99,15 +101,15 @@ const maxGenerationAttempts = 5;
 function initWorker() {
   log("Inizializzazione Web Worker...");
   worker = new Worker("worker.js?v=" + new Date().getTime());
-  
+
   worker.onerror = (err) => {
     log(`[WORKER ERROR] ${err.message} in ${err.filename}:${err.lineno}`);
   };
-  
+
   worker.onmessage = (e) => {
     const { status, result, message } = e.data;
     log(`Messaggio ricevuto dal worker: status = "${status}"`);
-    
+
     if (status === "ready") {
       log("Dizionario registrato nel Web Worker con successo!");
       dictionaryLoaded = true;
@@ -146,13 +148,13 @@ async function loadDictionary() {
     const response = await fetch("dictionary.json?v=" + new Date().getTime());
     log(`Stato risposta fetch dizionario: ${response.status}`);
     const dict = await response.json();
-    
+
     let totalWords = 0;
     for (const len in dict) {
       totalWords += Object.keys(dict[len]).length;
     }
     log(`Dizionario caricato. Totale parole indicizzate: ${totalWords}`);
-    
+
     worker.postMessage({ action: "init", dict });
   } catch (err) {
     log(`[ERRORE DIZIONARIO] ${err.message}`);
@@ -160,41 +162,18 @@ async function loadDictionary() {
   }
 }
 
-// Generate crossword
 function generateNewCrossword(isRetry = false) {
-  if (!dictionaryLoaded) {
-    log("Impossibile generare: dizionario non caricato.");
-    return;
-  }
+  if (!dictionaryLoaded) return;
   showLoader("Generazione schema in corso...");
-  
-  if (!isRetry) {
+
+  // CORREZIONE: Controlla esplicitamente che non sia il flag booleano true
+  if (isRetry !== true) {
     generationAttempts = 0;
   }
-  
-  log(`--- INIZIO GENERAZIONE DILIGENTE ---`);
-  
-  // Raccogli tutti i template disponibili di qualsiasi dimensione
-  const allTemplates = [];
-  for (const sizeKey in window.TEMPLATES) {
-    allTemplates.push(...window.TEMPLATES[sizeKey]);
-  }
-  
-  if (allTemplates.length === 0) {
-    log(`[ERRORE] Nessun template disponibile nel sistema.`);
-    return;
-  }
-  
-  // Seleziona un template base casuale
-  const templateObj = allTemplates[Math.floor(Math.random() * allTemplates.length)];
-  log(`Selezionato template base: "${templateObj.name}" (${templateObj.grid[0].length}x${templateObj.grid.length})`);
-  
-  // Apply a random symmetry transformation (rotation/mirroring)
-  const transformedGrid = window.getRandomTransformation(templateObj.grid);
-  log(`Applicata trasformazione geometrica per variare il layout.`);
-  
-  log("Invio layout al Web Worker per la risoluzione...");
-  worker.postMessage({ action: "generate", template: transformedGrid });
+
+  const size = parseInt(selectSize ? selectSize.value : 11) || 11;
+  log(`Richiesta nuova topologia ${size}x${size} al Web Worker...`);
+  worker.postMessage({ action: "generate", rows: size, cols: size });
 }
 
 // Loader controls
@@ -211,20 +190,20 @@ function hideLoader() {
 function renderGrid() {
   gridContainer.innerHTML = "";
   const { rows, cols } = currentCrossword.gridSize;
-  
+
   gridContainer.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
   gridContainer.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
-  
+
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
       const char = currentCrossword.solution[r][c];
       const cellNum = currentCrossword.numberGrid[r][c];
-      
+
       const cellEl = document.createElement("div");
       cellEl.classList.add("cell");
       cellEl.dataset.row = r;
       cellEl.dataset.col = c;
-      
+
       if (char === "#") {
         cellEl.classList.add("black");
       } else {
@@ -234,21 +213,21 @@ function renderGrid() {
           numEl.innerText = cellNum;
           cellEl.appendChild(numEl);
         }
-        
+
         const inputEl = document.createElement("input");
         inputEl.type = "text";
         inputEl.maxLength = 1;
         inputEl.classList.add("cell-input");
         inputEl.dataset.row = r;
         inputEl.dataset.col = c;
-        
+
         inputEl.setAttribute("autocomplete", "off");
         inputEl.setAttribute("autocorrect", "off");
         inputEl.setAttribute("spellcheck", "false");
-        
+
         cellEl.appendChild(inputEl);
       }
-      
+
       gridContainer.appendChild(cellEl);
     }
   }
@@ -258,7 +237,7 @@ function renderGrid() {
 function renderClues() {
   listHorizontal.innerHTML = "";
   listVertical.innerHTML = "";
-  
+
   currentCrossword.horizontalClues.forEach(clue => {
     const li = document.createElement("li");
     li.dataset.num = clue.num;
@@ -267,7 +246,7 @@ function renderClues() {
     li.addEventListener("click", () => handleClueClick(clue, "H"));
     listHorizontal.appendChild(li);
   });
-  
+
   currentCrossword.verticalClues.forEach(clue => {
     const li = document.createElement("li");
     li.dataset.num = clue.num;
@@ -308,7 +287,7 @@ function updateHighlights(row, col) {
   document.querySelectorAll(".clues-list li").forEach(el => {
     el.classList.remove("highlight-active-clue", "highlight-word-clue");
   });
-  
+
   // Highlight active cell
   const activeCellEl = document.querySelector(`.cell[data-row="${row}"][data-col="${col}"]`);
   if (activeCellEl) {
@@ -332,7 +311,7 @@ function updateHighlights(row, col) {
         cellEl.classList.add("highlight-word");
       }
     }
-    
+
     // Highlight list item
     const listId = activeDirection === "H" ? "clues-horizontal-list" : "clues-vertical-list";
     const clueLi = document.querySelector(`#${listId} li[data-num="${currentClue.num}"]`);
@@ -342,7 +321,7 @@ function updateHighlights(row, col) {
         clueLi.scrollIntoView({ block: "nearest", behavior: "smooth" });
       }
     }
-    
+
     // Update mobile clue bar
     mobileBadge.innerText = activeDirection === "H" ? "ORIZ" : "VERT";
     mobileBadge.className = `clue-direction-badge ${activeDirection === "H" ? "" : "vert"}`;
@@ -382,7 +361,7 @@ function moveFocus(dr, dc) {
   const { rows, cols } = currentCrossword.gridSize;
   let nr = activeCell.r + dr;
   let nc = activeCell.c + dc;
-  
+
   while (nr >= 0 && nr < rows && nc >= 0 && nc < cols) {
     if (currentCrossword.solution[nr][nc] !== "#") {
       activeCell = { r: nr, c: nc };
@@ -397,21 +376,21 @@ function moveFocus(dr, dc) {
 // Event handlers
 function setupEventListeners() {
   btnNew.addEventListener("click", generateNewCrossword);
-  
+
   btnVerify.addEventListener("click", () => {
     if (!currentCrossword) return;
     const { rows, cols } = currentCrossword.gridSize;
     let allCorrect = true;
     let anyFilled = false;
-    
+
     for (let r = 0; r < rows; r++) {
       for (let c = 0; c < cols; c++) {
         if (currentCrossword.solution[r][c] === "#") continue;
-        
+
         const cellEl = document.querySelector(`.cell[data-row="${r}"][data-col="${c}"]`);
         const input = cellEl.querySelector("input");
         const val = input.value.toUpperCase();
-        
+
         if (val) {
           anyFilled = true;
           if (val === currentCrossword.solution[r][c]) {
@@ -425,7 +404,7 @@ function setupEventListeners() {
         }
       }
     }
-    
+
     if (anyFilled && allCorrect) {
       log("Cruciverba risolto con successo!");
       alert("Complimenti! Hai completato correttamente il cruciverba! 🎉");
@@ -433,7 +412,7 @@ function setupEventListeners() {
       log("Verifica completata: presenti errori o lettere mancanti.");
     }
   });
-  
+
   btnClear.addEventListener("click", () => {
     if (confirm("Vuoi davvero svuotare lo schema corrente?")) {
       document.querySelectorAll(".cell-input").forEach(input => input.value = "");
@@ -441,7 +420,7 @@ function setupEventListeners() {
       log("Griglia svuotata.");
     }
   });
-  
+
   btnReveal.addEventListener("click", () => {
     if (confirm("Vuoi mostrare la soluzione completa dello schema?")) {
       const { rows, cols } = currentCrossword.gridSize;
@@ -457,15 +436,15 @@ function setupEventListeners() {
       log("Soluzione dello schema rivelata.");
     }
   });
-  
+
   // Grid delegation
   gridContainer.addEventListener("click", (e) => {
     const input = e.target.closest(".cell-input");
     if (!input) return;
-    
+
     const r = parseInt(input.dataset.row);
     const c = parseInt(input.dataset.col);
-    
+
     if (activeCell.r === r && activeCell.c === c) {
       activeDirection = activeDirection === "H" ? "V" : "H";
     } else {
@@ -473,13 +452,13 @@ function setupEventListeners() {
     }
     updateHighlights(r, c);
   });
-  
+
   gridContainer.addEventListener("input", (e) => {
     const input = e.target;
     if (!input.classList.contains("cell-input")) return;
-    
+
     input.value = input.value.toUpperCase();
-    
+
     if (input.value) {
       if (activeDirection === "H") {
         moveFocus(0, 1);
@@ -488,14 +467,14 @@ function setupEventListeners() {
       }
     }
   });
-  
+
   gridContainer.addEventListener("keydown", (e) => {
     const input = e.target;
     if (!input.classList.contains("cell-input")) return;
-    
+
     const r = parseInt(input.dataset.row);
     const c = parseInt(input.dataset.col);
-    
+
     switch (e.key) {
       case "ArrowRight":
         e.preventDefault();
@@ -538,12 +517,12 @@ function setupEventListeners() {
   const consoleBody = document.getElementById("console-body");
   const consoleIcon = document.getElementById("console-toggle-icon");
   const btnClearConsole = document.getElementById("btn-clear-console");
-  
+
   consoleHeader.addEventListener("click", () => {
     const isCollapsed = consoleBody.classList.toggle("collapsed");
     consoleIcon.className = isCollapsed ? "fa-solid fa-chevron-up" : "fa-solid fa-chevron-down";
   });
-  
+
   btnClearConsole.addEventListener("click", (e) => {
     e.stopPropagation(); // prevent collapse
     const pre = document.getElementById("console-log-pre");

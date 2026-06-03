@@ -1,22 +1,49 @@
 // worker.js
-// Web Worker for generating the crossword layout using backtracking search.
+// Web Worker per la generazione dinamica della topologia e risoluzione via backtracking search.
+
+importScripts("config.js");
+
 
 let dictionary = null;
 let wordScores = {};
 let dictionaryKeys = {};
 
-self.onmessage = function(e) {
-  const { action, template, dict } = e.data;
+// Struttura dati Trie per l'indicizzazione efficiente
+class TrieNode {
+  constructor() {
+    this.children = {};
+    this.isWord = false;
+  }
+}
+
+let trieRoots = {}; // Una radice ad albero per ogni lunghezza di parola
+
+function insertWord(word, length) {
+  if (!trieRoots[length]) trieRoots[length] = new TrieNode();
+  let node = trieRoots[length];
+  for (let char of word) {
+    if (!node.children[char]) node.children[char] = new TrieNode();
+    node = node.children[char];
+  }
+  node.isWord = true;
+}
+
+self.onmessage = function (e) {
+  // CORREZIONE 1: Estraiamo anche rows e cols inviati da app.js
+  const { action, template, dict, rows, cols } = e.data;
 
   if (action === "init") {
     dictionary = dict;
     wordScores = {};
     dictionaryKeys = {};
+    trieRoots = {};
+
     for (const len in dictionary) {
       const lengthInt = parseInt(len);
       dictionaryKeys[len] = Object.keys(dictionary[len]);
       for (const word in dictionary[len]) {
         wordScores[word] = calculateWordScore(word, lengthInt);
+        insertWord(word, lengthInt); // Popoliamo il Trie in fase di init
       }
     }
     self.postMessage({ status: "ready" });
@@ -30,7 +57,19 @@ self.onmessage = function(e) {
     }
 
     try {
-      const result = generateCrossword(template);
+      let actualTemplate = template;
+
+      // Se non viene passato un template precompilato, lo generiamo proceduralmente
+      if (!actualTemplate && rows && cols) {
+        actualTemplate = generateGridTopology(rows, cols);
+      }
+
+      if (!actualTemplate) {
+        self.postMessage({ status: "error", message: "Impossibile generare o ricevere una topologia valida." });
+        return;
+      }
+
+      const result = generateCrossword(actualTemplate);
       if (result) {
         self.postMessage({ status: "success", result });
       } else {
@@ -42,11 +81,122 @@ self.onmessage = function(e) {
   }
 };
 
+// Generatore procedurale di geometrie simmetriche con vincoli gaussiani
+function generateGridTopology(rows, cols) {
+  let bestGrid = null;
+  let bestScore = -Infinity;
+  const maxAttempts = 300;
+
+  for (let i = 0; i < maxAttempts; i++) {
+    let grid = Array(rows).fill(null).map(() => Array(cols).fill(' '));
+
+    // Target ideale di caselle nere usando la configurazione globale
+    const blackSquareTarget = Math.floor((rows * cols) * CRUCIGEN_CONFIG.blackSquareTargetMultiplier);
+    let blackSquares = 0;
+
+    while (blackSquares < blackSquareTarget) {
+      let r = Math.floor(Math.random() * rows);
+      let c = Math.floor(Math.random() * cols);
+
+      if (grid[r][c] === ' ') {
+        grid[r][c] = '#';
+        // Applica simmetria rotazionale speculare a 180° (Stile classico)
+        if (grid[rows - 1 - r][cols - 1 - c] === ' ') {
+          grid[rows - 1 - r][cols - 1 - c] = '#';
+          blackSquares++;
+        }
+        blackSquares++;
+      }
+    }
+
+    let score = evaluateGridFitness(grid, rows, cols);
+    if (score > bestScore) {
+      bestScore = score;
+      bestGrid = grid;
+    }
+  }
+  return bestGrid;
+}
+
+// CORREZIONE 3: Logica completa di valutazione della griglia (Gaussiana + Flood Fill di connettività)
+function evaluateGridFitness(grid, rows, cols) {
+  const lengthScores = CRUCIGEN_CONFIG.lengthScores;
+
+  let score = 0;
+  let totalWhiteCells = 0;
+  let firstWhite = null;
+
+  // Analisi slot Orizzontali
+  for (let r = 0; r < rows; r++) {
+    let len = 0;
+    for (let c = 0; c < cols; c++) {
+      if (grid[r][c] === ' ') {
+        len++;
+        totalWhiteCells++;
+        if (!firstWhite) firstWhite = { r, c };
+      } else {
+        if (len > 0) {
+          score += (lengthScores[len] !== undefined ? lengthScores[len] : 0);
+          len = 0;
+        }
+      }
+    }
+    if (len > 0) score += (lengthScores[len] !== undefined ? lengthScores[len] : 0);
+  }
+
+  // Analisi slot Verticali
+  for (let c = 0; c < cols; c++) {
+    let len = 0;
+    for (let r = 0; r < rows; r++) {
+      if (grid[r][c] === ' ') {
+        len++;
+      } else {
+        if (len > 0) {
+          score += (lengthScores[len] !== undefined ? lengthScores[len] : 0);
+          len = 0;
+        }
+      }
+    }
+    if (len > 0) score += (lengthScores[len] !== undefined ? lengthScores[len] : 0);
+  }
+
+  if (totalWhiteCells === 0) return -Infinity;
+
+  // FLOOD FILL / BFS: Verifica che la griglia non abbia "isole" di lettere isolate
+  let visitedCount = 0;
+  let visited = Array(rows).fill(null).map(() => Array(cols).fill(false));
+  let queue = [firstWhite];
+  visited[firstWhite.r][firstWhite.c] = true;
+
+  while (queue.length > 0) {
+    let { r, c } = queue.shift();
+    visitedCount++;
+
+    const dirs = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+    for (let [dr, dc] of dirs) {
+      let nr = r + dr;
+      let nc = c + dc;
+      if (nr >= 0 && nr < rows && nc >= 0 && nc < cols) {
+        if (grid[nr][nc] === ' ' && !visited[nr][nc]) {
+          visited[nr][nc] = true;
+          queue.push({ r: nr, c: nc });
+        }
+      }
+    }
+  }
+
+  // Se alcune caselle bianche rimangono isolate dal resto del flusso, penalizzazione massima
+  if (visitedCount < totalWhiteCells) {
+    return -Infinity;
+  }
+
+  return score;
+}
+
 function generateCrossword(template) {
   const rows = template.length;
   const cols = template[0].length;
-  
-  // 1. Initialize grid state
+
   const grid = [];
   for (let r = 0; r < rows; r++) {
     grid.push([]);
@@ -55,7 +205,6 @@ function generateCrossword(template) {
     }
   }
 
-  // 2. Find slots and assign numbers
   const slots = [];
   let nextNumber = 1;
   const numberGrid = Array(rows).fill(null).map(() => Array(cols).fill(null));
@@ -71,7 +220,6 @@ function generateCrossword(template) {
         numberGrid[r][c] = nextNumber++;
       }
 
-      // Collect horizontal slot
       if (isHStart) {
         const cells = [];
         let cc = c;
@@ -89,7 +237,6 @@ function generateCrossword(template) {
         });
       }
 
-      // Collect vertical slot
       if (isVStart) {
         const cells = [];
         let rr = r;
@@ -108,54 +255,62 @@ function generateCrossword(template) {
       }
     }
   }
-  // Pre-calculate slot cell indexes for matching patterns
+
   slots.forEach(slot => {
     slot.patternIndices = slot.cells.map(([r, c]) => ({ r, c }));
   });
 
-  // 3. Backtracking Solver with MRV and Randomization
   let steps = 0;
-  const maxSteps = 3000; // Fast cutoff to avoid worker freeze
+  const maxSteps = CRUCIGEN_CONFIG.maxSteps;
   const usedWords = new Set();
 
   function solve(slotIndex) {
     steps++;
     if (steps > maxSteps) return false;
-
     if (slotIndex === slots.length) return true;
 
-    // Pick slot with Minimum Remaining Values (MRV)
+    // Seleziona lo slot usando MRV (Minimum Remaining Values) + Tie-break basato sul grado di incastro
     let bestIdx = -1;
     let minCandidates = Infinity;
+    let maxDegree = -1;
     let bestCandidates = [];
 
     for (let i = slotIndex; i < slots.length; i++) {
       const slot = slots[i];
-      
       let pattern = "";
+      let emptyIntersections = 0;
+
       for (const { r, c } of slot.patternIndices) {
-        pattern += grid[r][c];
+        const char = grid[r][c];
+        pattern += char;
+        if (char === ' ') emptyIntersections++;
       }
 
       const candidates = getCandidates(slot.length, pattern);
+      if (candidates.length === 0) return false;
+
       if (candidates.length < minCandidates) {
         minCandidates = candidates.length;
         bestIdx = i;
         bestCandidates = candidates;
+        maxDegree = emptyIntersections;
+      } else if (candidates.length === minCandidates) {
+        if (emptyIntersections > maxDegree) {
+          bestIdx = i;
+          bestCandidates = candidates;
+          maxDegree = emptyIntersections;
+        }
       }
-      if (minCandidates === 0) return false; // Early pruning
     }
 
     if (bestIdx === -1) return false;
 
-    // Swap best slot to current index
     const temp = slots[slotIndex];
     slots[slotIndex] = slots[bestIdx];
     slots[bestIdx] = temp;
 
     const currentSlot = slots[slotIndex];
-    
-    // Sort candidates using pre-calculated heuristic scoring
+
     bestCandidates.sort((a, b) => {
       const scoreA = (wordScores[a] || 0) + Math.random() * 2;
       const scoreB = (wordScores[b] || 0) + Math.random() * 2;
@@ -165,11 +320,9 @@ function generateCrossword(template) {
     for (const candidate of bestCandidates) {
       if (usedWords.has(candidate)) continue;
 
-      // Apply choice
       usedWords.add(candidate);
       currentSlot.word = candidate;
-      
-      // Fill grid
+
       const oldChars = [];
       for (let j = 0; j < currentSlot.length; j++) {
         const { r, c } = currentSlot.patternIndices[j];
@@ -177,11 +330,9 @@ function generateCrossword(template) {
         grid[r][c] = candidate[j];
       }
 
-      // Recurse
       if (solve(slotIndex + 1)) return true;
-      if (steps > maxSteps) return false; // Fast abort propagation
+      if (steps > maxSteps) return false;
 
-      // Backtrack
       usedWords.delete(candidate);
       currentSlot.word = null;
       for (let j = 0; j < currentSlot.length; j++) {
@@ -190,7 +341,6 @@ function generateCrossword(template) {
       }
     }
 
-    // Restore order of slots on failure
     const tempBack = slots[slotIndex];
     slots[slotIndex] = slots[bestIdx];
     slots[bestIdx] = tempBack;
@@ -198,41 +348,39 @@ function generateCrossword(template) {
     return false;
   }
 
+  // Ricerca dei candidati con pattern matching integrato direttamente nell'albero Trie O(L)
   function getCandidates(len, pattern) {
-    const lenStr = len.toString();
-    if (!dictionaryKeys[lenStr]) return [];
+    const root = trieRoots[len];
+    if (!root) return [];
 
-    const candidates = [];
-    const keys = dictionaryKeys[lenStr];
-    
-    for (const word of keys) {
-      let matches = true;
-      for (let i = 0; i < len; i++) {
-        if (pattern[i] !== ' ' && pattern[i] !== word[i]) {
-          matches = false;
-          break;
+    const results = [];
+
+    function search(node, index, currentWord) {
+      if (index === len) {
+        if (node.isWord) results.push(currentWord);
+        return;
+      }
+
+      const char = pattern[index];
+      if (char === ' ') {
+        for (const letter in node.children) {
+          search(node.children[letter], index + 1, currentWord + letter);
+        }
+      } else {
+        if (node.children[char]) {
+          search(node.children[char], index + 1, currentWord + char);
         }
       }
-      if (matches) {
-        candidates.push(word);
-      }
     }
-    return candidates;
+
+    search(root, 0, "");
+    return results;
   }
 
-  function shuffle(array) {
-    for (let i = array.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [array[i], array[j]] = [array[j], array[i]];
-    }
-  }
-
-  // Initial sort
   slots.sort((a, b) => b.length - a.length);
   const solved = solve(0);
   if (!solved) return null;
 
-  // 4. Format the final output
   const solution = grid.map(row => row.join(''));
   const horizontalClues = [];
   const verticalClues = [];
@@ -272,21 +420,19 @@ function generateCrossword(template) {
   };
 }
 
+// CORREZIONE 2: Sintassi della funzione ripulita dai log spuri della console
 function calculateWordScore(word, len) {
   let score = 0;
   const vowels = (word.match(/[AEIOU]/g) || []).length;
   const vowelRatio = vowels / len;
 
-  // Ideal vowel ratio for Italian is around 40-55%
   if (vowelRatio >= 0.4 && vowelRatio <= 0.6) {
     score += 15;
   } else if (vowelRatio >= 0.3 && vowelRatio <= 0.7) {
     score += 5;
   }
 
-  // Penalize highly repetitive letters (e.g. BBB)
   const uniqueLetters = new Set(word).size;
   score += (uniqueLetters / len) * 10;
   return score;
 }
-
