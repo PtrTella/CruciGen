@@ -118,7 +118,6 @@ function generateGridTopology(rows, cols) {
           // AND Logico: Ripara solo se è un quadrato bianco intrappolato ovunque
           if (isH1 && isV1) {
             grid[r][c] = '#';
-            grid[rows - 1 - r][cols - 1 - c] = '#';
           }
         }
       }
