@@ -31,6 +31,8 @@ const CRUCIGEN_CONFIG = {
   maxSteps: 3000,
   blackSquareTargetMultiplier: 0.17,
   maxGenerationAttempts: 10,
+  gridTopologyCandidates: 300,
+  blackSquarePenalty: 20,
 
   // Esegue la funzione matematica e salva la mappa pre-calcolata
   lengthScores: generateGaussScores()
