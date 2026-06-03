@@ -357,6 +357,7 @@ main {
   cursor: pointer;
   padding-top: clamp(2px, 1.5vw, 6px);
   touch-action: manipulation;
+  min-width: 0;
 }
 
 /* Cell State Highlights */
@@ -449,10 +450,10 @@ main {
 .mobile-clue-bar .clue-text {
   font-weight: 500;
   color: var(--text-primary);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  word-break: break-word;
+  white-space: normal;
   flex: 1;
+  min-width: 0;
 }
 
 /* --- Clues Section (Right Column) --- */
@@ -662,6 +663,25 @@ kbd {
 }
 
 @media (max-width: 600px) {
+  main {
+    padding: 0.5rem !important;
+  }
+
+  .main-container {
+    gap: 0.75rem !important;
+  }
+
+  .grid-section {
+    gap: 0.5rem !important;
+  }
+
+  .grid-card {
+    display: flex;
+    flex-direction: column;
+    padding: 0.5rem !important;
+    gap: 0.75rem !important;
+  }
+
   .cell-input {
     font-size: 16px !important;
   }
@@ -670,11 +690,21 @@ kbd {
     grid-template-columns: 1fr;
   }
   
-  .mobile-clue-bar {
+  #mobile-clue-bar {
     display: flex;
+    order: 1;
+    margin-bottom: 0.25rem;
+  }
+
+  #crossword-grid-container {
+    order: 2;
+    max-width: 100% !important;
+    width: 100% !important;
+    margin: 0 auto !important;
   }
   
   .action-bar {
+    order: 3;
     flex-wrap: wrap;
   }
   

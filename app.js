@@ -173,7 +173,7 @@ function generateNewCrossword(isRetry = false) {
     generationAttempts = 0;
   }
 
-  const size = parseInt(selectSize ? selectSize.value : 11) || 11;
+  const size = parseInt(selectSize ? selectSize.value : 9) || 9;
   log(`Richiesta nuova topologia ${size}x${size} al Web Worker...`);
   worker.postMessage({ action: "generate", rows: size, cols: size });
 }
@@ -552,25 +552,6 @@ function setupEventListeners() {
       activeDirection = activeDirection === "H" ? "V" : "H";
       updateHighlights(activeCell.r, activeCell.c);
       log(`Direzione cambiata a: ${activeDirection === "H" ? "Orizzontali" : "Verticali"}`);
-    });
-  }
-
-  // Adjust mobile clue bar location dynamically above keyboard
-  if (window.visualViewport) {
-    window.visualViewport.addEventListener("resize", () => {
-      const clueBar = document.getElementById("mobile-clue-bar");
-      if (clueBar && window.innerWidth <= 600) {
-        const height = window.visualViewport.height;
-        clueBar.style.position = "fixed";
-        clueBar.style.bottom = `${window.innerHeight - height}px`;
-        clueBar.style.left = "0";
-        clueBar.style.right = "0";
-        clueBar.style.borderRadius = "0";
-        clueBar.style.borderLeft = "none";
-        clueBar.style.borderRight = "none";
-        clueBar.style.width = "100vw";
-        clueBar.style.boxShadow = "0 -4px 10px rgba(0,0,0,0.15)";
-      }
     });
   }
 
