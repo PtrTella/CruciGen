@@ -40,10 +40,18 @@ self.onmessage = function (e) {
 
     for (const len in dictionary) {
       const lengthInt = parseInt(len);
-      dictionaryKeys[len] = Object.keys(dictionary[len]);
+      // Pre-calculate scores
       for (const word in dictionary[len]) {
         wordScores[word] = calculateWordScore(word, lengthInt);
-        insertWord(word, lengthInt); // Popoliamo il Trie in fase di init
+      }
+      
+      // Sort words by score descending
+      const sortedWords = Object.keys(dictionary[len]).sort((a, b) => wordScores[b] - wordScores[a]);
+      dictionaryKeys[len] = sortedWords;
+
+      // Insert into Trie in sorted order (so high scoring letter paths are traversed first)
+      for (const word of sortedWords) {
+        insertWord(word, lengthInt);
       }
     }
     self.postMessage({ status: "ready" });
@@ -337,11 +345,16 @@ function generateCrossword(template) {
 
     const currentSlot = slots[slotIndex];
 
-    bestCandidates.sort((a, b) => {
-      const scoreA = (wordScores[a] || 0) + Math.random() * 2;
-      const scoreB = (wordScores[b] || 0) + Math.random() * 2;
-      return scoreB - scoreA;
-    });
+    // Optimization: Since the candidates list is already pre-sorted by score (descending),
+    // we only need to sort the top candidates defined by candidateJitterWindow with a random jitter to maintain high speed.
+    const jitterWindow = CRUCIGEN_CONFIG.candidateJitterWindow || 50;
+    if (bestCandidates.length > jitterWindow) {
+      const topPart = bestCandidates.slice(0, jitterWindow);
+      topPart.sort((a, b) => (wordScores[b] + Math.random() * 3) - (wordScores[a] + Math.random() * 3));
+      bestCandidates = topPart.concat(bestCandidates.slice(jitterWindow));
+    } else {
+      bestCandidates.sort((a, b) => (wordScores[b] + Math.random() * 3) - (wordScores[a] + Math.random() * 3));
+    }
 
     for (const candidate of bestCandidates) {
       if (usedWords.has(candidate)) continue;
