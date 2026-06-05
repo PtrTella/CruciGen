@@ -176,7 +176,7 @@ header {
   color: var(--text-secondary);
 }
 
-.size-selector select {
+.size-selector select, .mode-selector select {
   background-color: var(--bg-secondary);
   color: var(--text-primary);
   border: 1px solid var(--border-color);
@@ -193,7 +193,7 @@ header {
   transition: border-color var(--transition-fast);
 }
 
-.size-selector select:hover {
+.size-selector select:hover, .mode-selector select:hover {
   border-color: var(--accent-color);
 }
 
@@ -818,5 +818,100 @@ body.light-mode .console-header {
 body.light-mode #console-log-pre {
   color: hsl(120, 70%, 25%); /* Dark green in light mode */
   text-shadow: none;
+}
+
+/* --- Encrypted Mode Styles --- */
+.cipher-num {
+  position: absolute;
+  bottom: 2px;
+  right: 4px;
+  font-size: clamp(0.5rem, 2vw, 0.7rem);
+  font-weight: 700;
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.cell.pre-filled {
+  background-color: var(--accent-light) !important;
+}
+
+.cell.pre-filled .cell-input {
+  color: var(--accent-color) !important;
+  font-weight: 800;
+}
+
+.legend-help {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.75rem;
+  line-height: 1.4;
+}
+
+.legend-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(54px, 1fr));
+  gap: 0.5rem;
+}
+
+.legend-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-sm);
+  padding: 0.4rem;
+  transition: all var(--transition-fast);
+}
+
+.legend-item:hover {
+  border-color: var(--accent-color);
+}
+
+.legend-item.highlight-active {
+  border-color: var(--accent-color) !important;
+  background: var(--accent-light) !important;
+}
+
+.legend-num {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.legend-input {
+  width: 1.8rem;
+  height: 1.8rem;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  text-align: center;
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  outline: none;
+  transition: border-color var(--transition-fast);
+}
+
+.legend-input:focus {
+  border-color: var(--accent-color);
+}
+
+.legend-input:disabled {
+  background: var(--accent-color);
+  color: white;
+  border-color: var(--accent-color);
+  cursor: not-allowed;
+}
+
+body.light-mode .legend-input:disabled {
+  background: var(--accent-color);
+  color: white;
+}
+
+.hidden {
+  display: none !important;
 }
 

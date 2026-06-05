@@ -15,10 +15,10 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="CruciGen">
-  <link rel="apple-touch-icon" sizes="180x180" href="favicon/apple-touch-icon.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="favicon/favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="favicon/favicon-16x16.png">
-  <link rel="shortcut icon" href="favicon/favicon.ico">
+  <link rel="apple-touch-icon" sizes="180x180" href="src/assets/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="src/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="src/assets/favicon/favicon-16x16.png">
+  <link rel="shortcut icon" href="src/assets/favicon/favicon.ico">
 
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -30,7 +30,7 @@
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="src/css/style.css">
 </head>
 
 <body class="dark-mode">
@@ -45,6 +45,13 @@
       </div>
 
       <div class="controls-header">
+        <div class="mode-selector">
+          <select id="select-mode">
+            <option value="classic" selected>Cruciverba Classico</option>
+            <option value="encrypted">Cruciverba Crittografato</option>
+          </select>
+        </div>
+
         <div class="size-selector">
           <select id="select-size">
             <option value="9" selected>Tascabile 9x9</option>
@@ -133,6 +140,15 @@
             </div>
           </div>
 
+          <!-- Legenda Crittografato -->
+          <div class="card clues-card hidden" id="encrypted-legend-card">
+            <h2><span class="badge badge-vert"><i class="fa-solid fa-key"></i></span> Legenda Cifrata</h2>
+            <p class="legend-help">Associa ogni numero a una lettera. Digita in una casella per riempire lo schema.</p>
+            <div class="legend-grid" id="legend-grid-container">
+              <!-- Generato da JS -->
+            </div>
+          </div>
+
         </div>
       </section>
 
@@ -167,8 +183,8 @@
   </footer>
 
   <!-- Core Scripts -->
-  <script src="config.js"></script>
-  <script src="app.js"></script>
+  <script src="src/js/config.js"></script>
+  <script type="module" src="src/js/app.js"></script>
 </body>
 
 </html>

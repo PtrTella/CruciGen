@@ -62,9 +62,18 @@ Per pubblicare il tuo sito web gratuitamente:
 
 ## 🧠 Struttura del Progetto
 
-- `index.html`: La struttura della pagina e dell'interfaccia di gioco.
-- `style.css`: Il design system responsivo con variabili HSL e transizioni.
-- `app.js`: Il gestore degli input utente, dello stato del gioco e della griglia.
-- `worker.js`: Il motore algoritmico che esegue la risoluzione del cruciverba in background.
-- `templates.js`: La collezione di schemi con caselle nere simmetriche.
-- `dictionary.json`: Il dizionario di parole e indizi.
+- `index.html`: La pagina principale dell'applicazione (SPA).
+- `manifest.json`: File manifest per il supporto PWA.
+- `sw.js`: Service Worker per il supporto offline e PWA.
+- `src/`: Cartella contenente tutti i codici sorgenti strutturati:
+  - `css/style.css`: Il design system con variabili HSL e stili.
+  - `assets/`: File di dati e immagini:
+    - `dictionary.json`: Il dizionario di parole e indizi.
+    - `favicon/`: Collezione delle icone e dei favicon dell'applicazione.
+  - `js/`: Cartella JavaScript:
+    - `config.js`: File di configurazione dei parametri matematici.
+    - `app.js`: Entry point ES Module per il frontend.
+    - `worker.js`: Entry point per il Web Worker in background.
+    - `modules/`: Moduli ES6 frontend (state, dom, logger, theme, ui, worker-client, events).
+    - `worker/`: Sottomoduli del worker (trie, utils, generator, solver).
+- `utils/`: Script di utilità Python esterni per elaborare i dizionari.
