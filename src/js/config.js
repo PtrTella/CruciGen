@@ -38,7 +38,11 @@ const CRUCIGEN_CONFIG = {
   },
   candidateJitterWindow: 80,          // Parole top rimescolate per varietà
   blackSquareTargetMultiplier: 0.17,  // % ideale caselle nere (0.17 = 17%)
-  lengthScores: generateGaussScores() // Punteggi lunghezze parole (Gaussiana)
+  lengthScores: generateGaussScores(), // Punteggi lunghezze parole (Gaussiana)
+  difficultyWeights: {
+    easyBiasMultiplier: 100,          // Moltiplicatore spinta per parole facili
+    hardBiasMultiplier: 100           // Moltiplicatore spinta per parole difficili
+  }
 };
 
 // Rendiamo l'oggetto accessibile globalmente nei diversi contesti

@@ -11,6 +11,7 @@ export const state = {
   backspaceProcessedInKeydown: false,
   generationAttempts: 0,
   gameMode: "classic", // "classic" o "encrypted"
+  targetDifficulty: "easy", // "easy", "medium" o "hard"
   cipherMap: {}, // Mappa Lettera -> Numero (es: 'A' -> 1)
   cipherRevMap: {}, // Mappa Numero -> Lettera (es: 1 -> 'A')
   revealedNumbers: new Set(), // Numeri cifrati pre-rivelati (parola indizio)

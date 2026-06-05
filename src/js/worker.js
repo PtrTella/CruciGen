@@ -14,7 +14,7 @@ wordScores = {};
 dictionaryKeys = {};
 
 self.onmessage = function (e) {
-  const { action, template, dict, rows, cols } = e.data;
+  const { action, template, dict, rows, cols, targetDifficulty } = e.data;
 
   if (action === "init") {
     dictionary = dict;
@@ -61,7 +61,7 @@ self.onmessage = function (e) {
         return;
       }
 
-      const result = generateCrossword(actualTemplate);
+      const result = generateCrossword(actualTemplate, targetDifficulty);
       if (result) {
         self.postMessage({ status: "success", result });
       } else {

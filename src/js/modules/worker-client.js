@@ -90,8 +90,13 @@ export function generateNewCrossword(isRetry = false) {
   }
 
   const size = parseInt(dom.selectSize ? dom.selectSize.value : 9) || 9;
-  log(`Richiesta nuova topologia ${size}x${size} al Web Worker...`);
-  state.worker.postMessage({ action: "generate", rows: size, cols: size });
+  log(`Richiesta nuova topologia ${size}x${size} al Web Worker con target difficoltà: ${state.targetDifficulty}...`);
+  state.worker.postMessage({ 
+    action: "generate", 
+    rows: size, 
+    cols: size,
+    targetDifficulty: state.targetDifficulty 
+  });
 }
 
 function initEncryptedCrossword(result) {

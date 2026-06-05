@@ -31,6 +31,12 @@ export function setupEventListeners() {
     generateNewCrossword();
   });
 
+  dom.selectDifficulty.addEventListener("change", () => {
+    state.targetDifficulty = dom.selectDifficulty.value;
+    log(`Target difficoltà cambiato a: ${state.targetDifficulty}`);
+    generateNewCrossword();
+  });
+
   dom.btnNew.addEventListener("click", () => generateNewCrossword());
 
   dom.btnVerify.addEventListener("click", () => {

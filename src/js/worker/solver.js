@@ -1,7 +1,32 @@
-// src/js/worker/solver.js
-// Algoritmo di risoluzione cruciverba via backtracking search e constraint satisfaction (CSP).
+function getDynamicScore(word, len, targetDifficulty) {
+  let baseScore = wordScores[word] || 0;
+  if (!targetDifficulty || targetDifficulty === "medium") {
+    return baseScore;
+  }
 
-function generateCrossword(template) {
+  let difficulty = 0.5;
+  if (typeof dictionary !== 'undefined' && dictionary) {
+    const entry = dictionary[len.toString()][word];
+    if (entry && typeof entry === 'object' && 'difficulty' in entry) {
+      difficulty = entry.difficulty;
+    }
+  }
+
+  const easyMult = (typeof CRUCIGEN_CONFIG !== 'undefined' && CRUCIGEN_CONFIG.difficultyWeights && CRUCIGEN_CONFIG.difficultyWeights.easyBiasMultiplier) || 100;
+  const hardMult = (typeof CRUCIGEN_CONFIG !== 'undefined' && CRUCIGEN_CONFIG.difficultyWeights && CRUCIGEN_CONFIG.difficultyWeights.hardBiasMultiplier) || 100;
+
+  if (targetDifficulty === "easy") {
+    // Spinge fortemente sulle parole facili (valore basso di difficulty)
+    return (1.0 - difficulty) * easyMult + baseScore;
+  } else if (targetDifficulty === "hard") {
+    // Spinge fortemente sulle parole difficili (valore alto di difficulty)
+    return difficulty * hardMult + baseScore;
+  }
+
+  return baseScore;
+}
+
+function generateCrossword(template, targetDifficulty) {
   const rows = template.length;
   const cols = template[0].length;
 
@@ -121,14 +146,18 @@ function generateCrossword(template) {
 
     const currentSlot = slots[slotIndex];
 
-    // Optimization: Sort the top candidates defined by candidateJitterWindow with a random jitter to maintain variety.
+    // Ordina TUTTI i candidati in base al punteggio dinamico di difficoltà desiderato prima di applicare la finestra di jitter.
+    // In questo modo, le parole effettivamente più facili (o difficili) emergono indipendentemente dalla loro lettera iniziale.
+    bestCandidates.sort((a, b) => getDynamicScore(b, currentSlot.length, targetDifficulty) - getDynamicScore(a, currentSlot.length, targetDifficulty));
+
     const jitterWindow = CRUCIGEN_CONFIG.candidateJitterWindow || 50;
     if (bestCandidates.length > jitterWindow) {
       const topPart = bestCandidates.slice(0, jitterWindow);
-      topPart.sort((a, b) => (wordScores[b] + Math.random() * 3) - (wordScores[a] + Math.random() * 3));
+      // Applica un piccolo jitter per variare gli schemi generati
+      topPart.sort((a, b) => (getDynamicScore(b, currentSlot.length, targetDifficulty) + Math.random() * 3) - (getDynamicScore(a, currentSlot.length, targetDifficulty) + Math.random() * 3));
       bestCandidates = topPart.concat(bestCandidates.slice(jitterWindow));
     } else {
-      bestCandidates.sort((a, b) => (wordScores[b] + Math.random() * 3) - (wordScores[a] + Math.random() * 3));
+      bestCandidates.sort((a, b) => (getDynamicScore(b, currentSlot.length, targetDifficulty) + Math.random() * 3) - (getDynamicScore(a, currentSlot.length, targetDifficulty) + Math.random() * 3));
     }
 
     for (const candidate of bestCandidates) {

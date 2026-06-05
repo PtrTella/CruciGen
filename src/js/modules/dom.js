@@ -6,6 +6,7 @@ export const dom = {};
 export function initDOM() {
   dom.gridContainer = document.getElementById("crossword-grid-container");
   dom.selectSize = document.getElementById("select-size");
+  dom.selectDifficulty = document.getElementById("select-difficulty");
   dom.btnNew = document.getElementById("btn-new");
   dom.btnVerify = document.getElementById("btn-verify");
   dom.btnClear = document.getElementById("btn-clear");

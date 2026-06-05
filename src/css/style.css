@@ -168,7 +168,7 @@ header {
   gap: 1rem;
 }
 
-.size-selector {
+.size-selector, .difficulty-selector {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -176,7 +176,7 @@ header {
   color: var(--text-secondary);
 }
 
-.size-selector select, .mode-selector select {
+.size-selector select, .mode-selector select, .difficulty-selector select {
   background-color: var(--bg-secondary);
   color: var(--text-primary);
   border: 1px solid var(--border-color);
@@ -193,7 +193,7 @@ header {
   transition: border-color var(--transition-fast);
 }
 
-.size-selector select:hover, .mode-selector select:hover {
+.size-selector select:hover, .mode-selector select:hover, .difficulty-selector select:hover {
   border-color: var(--accent-color);
 }
 
