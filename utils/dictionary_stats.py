@@ -2,7 +2,8 @@
 import json
 import os
 
-DICTIONARY_PATH = os.path.join(os.path.dirname(__file__), "dictionary.json")
+# Path to the actual dictionary asset
+DICTIONARY_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "src", "assets", "dictionary.json")
 
 def main():
     if not os.path.exists(DICTIONARY_PATH):
@@ -15,35 +16,84 @@ def main():
 
     total_words = 0
     total_clues = 0
+    total_matched = 0
+    pos_counts = {"n": 0, "v": 0, "a": 0, "unknown": 0}
     length_breakdown = {}
 
     for length_str, words in dictionary.items():
+        length = int(length_str)
         count = len(words)
         total_words += count
         
-        clues_for_len = sum(len(entry) for entry in words.values())
-        total_clues += clues_for_len
-        
-        length_breakdown[int(length_str)] = {
+        clues_for_len = 0
+        matched_for_len = 0
+        pos_for_len = {"n": 0, "v": 0, "a": 0, "unknown": 0}
+        unmatched_samples = []
+
+        for word, val in words.items():
+            # Support both old format [clues] and new format {"clues":..., "pos":...}
+            if isinstance(val, dict):
+                clues_count = len(val.get("clues", []))
+                pos = val.get("pos")
+            else:
+                clues_count = len(val)
+                pos = None
+                
+            clues_for_len += clues_count
+            total_clues += clues_count
+
+            if pos is not None:
+                matched_for_len += 1
+                total_matched += 1
+                pos_for_len[pos] = pos_for_len.get(pos, 0) + 1
+                pos_counts[pos] = pos_counts.get(pos, 0) + 1
+            else:
+                pos_for_len["unknown"] += 1
+                pos_counts["unknown"] += 1
+                if len(unmatched_samples) < 5:
+                    unmatched_samples.append(word)
+
+        length_breakdown[length] = {
             "words": count,
             "clues": clues_for_len,
-            "samples": list(words.keys())[:3]
+            "matched": matched_for_len,
+            "unmatched_samples": unmatched_samples,
+            "pos": pos_for_len
         }
 
-    print("\n==========================================")
-    print("        CRUCIGEN DICTIONARY STATS         ")
-    print("==========================================")
-    print(f"Total Unique Words:       {total_words:,}")
-    print(f"Total Unique Definitions: {total_clues:,}")
-    print(f"Average Clues per Word:   {total_clues / total_words:.2f}")
-    print("==========================================")
-    print(f"{'Length':<6} | {'Words':<10} | {'Total Clues':<12} | {'Samples'}")
-    print("-" * 60)
+    print("\n==========================================================================")
+    print("                    CRUCIGEN DICTIONARY ANALYSIS                        ")
+    print("==========================================================================")
+    print(f"Total Unique Words:            {total_words:,}")
+    print(f"Total Unique Definitions:      {total_clues:,}")
+    print(f"Average Clues per Word:        {total_clues / total_words:.2f}")
+    print(f"Total itWaC Matched Words:     {total_matched:,} ({total_matched / total_words * 100:.2f}%)")
+    print(f"Total Unmatched Words:         {total_words - total_matched:,} ({(total_words - total_matched) / total_words * 100:.2f}%)")
+    print("--------------------------------------------------------------------------")
+    print("Part Of Speech Breakdown (Matched Words):")
+    total_valid_pos = pos_counts["n"] + pos_counts["v"] + pos_counts["a"]
+    if total_valid_pos > 0:
+        print(f"  - Nouns (sostantivi):       {pos_counts['n']:,} ({pos_counts['n'] / total_matched * 100:.2f}%)")
+        print(f"  - Verbs (verbi):            {pos_counts['v']:,} ({pos_counts['v'] / total_matched * 100:.2f}%)")
+        print(f"  - Adjectives (aggettivi):   {pos_counts['a']:,} ({pos_counts['a'] / total_matched * 100:.2f}%)")
+    print("==========================================================================")
+    
+    # Table Header
+    print(f"{'Len':<4} | {'Total Words':<11} | {'Matched (itWaC)':<16} | {'Unmatched %':<11} | {'Unmatched Samples'}")
+    print("-" * 100)
+    
     for length in sorted(length_breakdown.keys()):
         stats = length_breakdown[length]
-        samples_str = ", ".join(stats["samples"])
-        print(f"{length:<6} | {stats['words']:<10,} | {stats['clues']:<12,} | {samples_str}")
-    print("==========================================")
+        matched_cnt = stats["matched"]
+        total_cnt = stats["words"]
+        matched_pct = (matched_cnt / total_cnt * 100) if total_cnt > 0 else 0
+        unmatched_pct = 100.0 - matched_pct
+        
+        samples_str = ", ".join(stats["unmatched_samples"]) if stats["unmatched_samples"] else "-"
+        
+        print(f"{length:<4} | {total_cnt:<11,} | {matched_cnt:<6,} ({matched_pct:5.1f}%) | {unmatched_pct:9.1f}% | {samples_str}")
+        
+    print("==========================================================================")
 
 if __name__ == "__main__":
     main()
