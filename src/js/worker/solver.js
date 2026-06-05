@@ -202,7 +202,6 @@ function generateCrossword(template) {
   slots.forEach(slot => {
     const dictEntry = dictionary[slot.length.toString()][slot.word];
     let clueText = "Nessuna definizione disponibile.";
-    let originalWord = (dictEntry && typeof dictEntry === 'object' && dictEntry.original) ? dictEntry.original : slot.word.toLowerCase();
     let pos = (dictEntry && typeof dictEntry === 'object' && dictEntry.pos) ? dictEntry.pos : null;
 
     if (dictEntry) {
@@ -215,7 +214,6 @@ function generateCrossword(template) {
     const clueObj = {
       num: slot.num,
       word: slot.word,
-      originalWord: originalWord,
       clue: clueText,
       row: slot.cells[0][0],
       col: slot.cells[0][1],
