@@ -954,3 +954,59 @@ body.light-mode .legend-input:disabled {
   animation: cellGlow 0.8s ease-in-out;
 }
 
+/* --- Difficulty Badge --- */
+.grid-header-info {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 0.75rem;
+  width: 100%;
+}
+
+.difficulty-badge {
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 0.35rem 0.8rem;
+  border-radius: 50px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-fast);
+}
+
+.difficulty-badge.easy {
+  color: var(--success-color);
+  background-color: var(--success-bg);
+  border-color: hsla(140, 75%, 50%, 0.3);
+}
+
+.difficulty-badge.medium {
+  color: hsl(35, 95%, 50%);
+  background-color: hsla(35, 95%, 50%, 0.15);
+  border-color: hsla(35, 95%, 50%, 0.3);
+}
+
+.difficulty-badge.hard {
+  color: var(--error-color);
+  background-color: var(--error-bg);
+  border-color: hsla(350, 85%, 60%, 0.3);
+}
+
+.pos-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  background-color: var(--accent-light);
+  border: 1px solid var(--accent-glow);
+  padding: 0.15rem 0.35rem;
+  border-radius: 4px;
+  color: var(--accent-color);
+  margin-right: 0.35rem;
+  vertical-align: middle;
+  display: inline-flex;
+  align-items: center;
+}
+

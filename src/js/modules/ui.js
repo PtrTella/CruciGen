@@ -89,6 +89,8 @@ export function renderGrid() {
 
 // Rendering delle definizioni
 export function renderClues() {
+  updateDifficultyBadge();
+
   if (state.gameMode === "encrypted") {
     dom.cluesHorizontalCard.classList.add("hidden");
     dom.cluesVerticalCard.classList.add("hidden");
@@ -115,7 +117,14 @@ export function renderClues() {
       const li = document.createElement("li");
       li.dataset.num = clue.num;
       li.dataset.dir = "H";
-      li.innerHTML = `<span class="clue-num">${clue.num}</span> ${clue.clue}`;
+      
+      let posTag = "";
+      if (clue.pos) {
+        const labels = { "n": "sost.", "v": "verb.", "a": "agg." };
+        posTag = `<span class="pos-badge">${labels[clue.pos] || clue.pos}</span> `;
+      }
+
+      li.innerHTML = `<span class="clue-num">${clue.num}</span> ${posTag}${clue.clue}`;
       li.addEventListener("click", () => handleClueClick(clue, "H"));
       dom.listHorizontal.appendChild(li);
     });
@@ -124,7 +133,14 @@ export function renderClues() {
       const li = document.createElement("li");
       li.dataset.num = clue.num;
       li.dataset.dir = "V";
-      li.innerHTML = `<span class="clue-num">${clue.num}</span> ${clue.clue}`;
+
+      let posTag = "";
+      if (clue.pos) {
+        const labels = { "n": "sost.", "v": "verb.", "a": "agg." };
+        posTag = `<span class="pos-badge">${labels[clue.pos] || clue.pos}</span> `;
+      }
+
+      li.innerHTML = `<span class="clue-num">${clue.num}</span> ${posTag}${clue.clue}`;
       li.addEventListener("click", () => handleClueClick(clue, "V"));
       dom.listVertical.appendChild(li);
     });
@@ -232,7 +248,10 @@ export function updateHighlights(row, col) {
     // Aggiorna la barra degli indizi per mobile
     dom.mobileBadge.innerText = state.activeDirection === "H" ? "ORIZ" : "VERT";
     dom.mobileBadge.className = `clue-direction-badge ${state.activeDirection === "H" ? "" : "vert"}`;
-    dom.mobileClueText.innerText = `${currentClue.num}. ${currentClue.clue}`;
+    
+    const labels = { "n": "sost.", "v": "verb.", "a": "agg." };
+    const posTagText = currentClue.pos ? `[${labels[currentClue.pos] || currentClue.pos}] ` : "";
+    dom.mobileClueText.innerText = `${currentClue.num}. ${posTagText}${currentClue.clue}`;
   }
 
   // Evidenzia l'indizio d'incrocio nell'altra lista
@@ -366,4 +385,38 @@ export function animateClueWordReveal(bestClue) {
   }, cells.length * 300);
 
   state.animationTimeouts.push(propagationTimeoutId);
+}
+
+// Aggiorna il badge di difficoltà complessiva dello schema
+export function updateDifficultyBadge() {
+  if (!dom.difficultyBadge) return;
+  
+  if (!state.currentCrossword || state.currentCrossword.difficulty === undefined) {
+    dom.difficultyBadge.classList.add("hidden");
+    return;
+  }
+  
+  const diff = state.currentCrossword.difficulty;
+  
+  // Rimuovi vecchie classi di difficoltà
+  dom.difficultyBadge.classList.remove("easy", "medium", "hard", "hidden");
+  
+  let label = "";
+  let className = "";
+  
+  if (diff < 0.35) {
+    label = "Facile";
+    className = "easy";
+  } else if (diff < 0.55) {
+    label = "Medio";
+    className = "medium";
+  } else {
+    label = "Difficile";
+    className = "hard";
+  }
+  
+  const percent = Math.round(diff * 100);
+  
+  dom.difficultyBadge.innerHTML = `<i class="fa-solid fa-gauge-high"></i> Difficoltà: <strong>${label} (${percent}%)</strong>`;
+  dom.difficultyBadge.classList.add(className);
 }

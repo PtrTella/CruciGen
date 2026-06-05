@@ -202,13 +202,13 @@ function generateCrossword(template) {
   slots.forEach(slot => {
     const dictEntry = dictionary[slot.length.toString()][slot.word];
     let clueText = "Nessuna definizione disponibile.";
-    let originalWord = slot.word.toLowerCase();
+    let originalWord = (dictEntry && typeof dictEntry === 'object' && dictEntry.original) ? dictEntry.original : slot.word.toLowerCase();
+    let pos = (dictEntry && typeof dictEntry === 'object' && dictEntry.pos) ? dictEntry.pos : null;
 
     if (dictEntry) {
-      if (Array.isArray(dictEntry)) {
-        clueText = dictEntry[Math.floor(Math.random() * dictEntry.length)];
-      } else {
-        clueText = dictEntry;
+      const clues = Array.isArray(dictEntry) ? dictEntry : (dictEntry.clues || []);
+      if (clues.length > 0) {
+        clueText = clues[Math.floor(Math.random() * clues.length)];
       }
     }
 
@@ -221,7 +221,8 @@ function generateCrossword(template) {
       col: slot.cells[0][1],
       length: slot.length,
       cells: slot.cells,
-      direction: slot.direction
+      direction: slot.direction,
+      pos: pos
     };
 
     if (slot.direction === "H") {
@@ -234,12 +235,25 @@ function generateCrossword(template) {
   horizontalClues.sort((a, b) => a.num - b.num);
   verticalClues.sort((a, b) => a.num - b.num);
 
+  // Calcola la difficoltà complessiva dello schema come media delle difficoltà delle parole inserite
+  let totalDifficulty = 0;
+  let wordCount = 0;
+  slots.forEach(slot => {
+    const dictEntry = dictionary[slot.length.toString()][slot.word];
+    if (dictEntry && typeof dictEntry === 'object' && 'difficulty' in dictEntry) {
+      totalDifficulty += dictEntry.difficulty;
+      wordCount++;
+    }
+  });
+  const avgDifficulty = wordCount > 0 ? (totalDifficulty / wordCount) : 0.25;
+
   return {
     solution,
     numberGrid,
     horizontalClues,
     verticalClues,
     gridSize: { rows, cols },
-    steps
+    steps,
+    difficulty: avgDifficulty
   };
 }

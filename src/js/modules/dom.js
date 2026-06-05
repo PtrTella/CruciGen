@@ -23,4 +23,5 @@ export function initDOM() {
   dom.legendGridContainer = document.getElementById("legend-grid-container");
   dom.cluesHorizontalCard = document.getElementById("clues-horizontal-card");
   dom.cluesVerticalCard = document.getElementById("clues-vertical-card");
+  dom.difficultyBadge = document.getElementById("crossword-difficulty-badge");
 }
