@@ -397,7 +397,10 @@ function setupEventListeners() {
 
         if (val) {
           anyFilled = true;
-          if (val === currentCrossword.solution[r][c]) {
+          const solChar = currentCrossword.solution[r][c];
+          const normVal = val.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+          const normSol = solChar.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+          if (normVal === normSol) {
             cellEl.classList.add("verified");
           } else {
             cellEl.classList.add("error");

@@ -415,8 +415,17 @@ function generateCrossword(template) {
   const verticalClues = [];
 
   slots.forEach(slot => {
-    const clueText = dictionary[slot.length.toString()][slot.word] || "Nessuna definizione disponibile.";
-    const originalWord = slot.word;
+    const dictEntry = dictionary[slot.length.toString()][slot.word];
+    let clueText = "Nessuna definizione disponibile.";
+    let originalWord = slot.word.toLowerCase();
+
+    if (dictEntry) {
+      if (Array.isArray(dictEntry)) {
+        clueText = dictEntry[Math.floor(Math.random() * dictEntry.length)];
+      } else {
+        clueText = dictEntry;
+      }
+    }
 
     const clueObj = {
       num: slot.num,
