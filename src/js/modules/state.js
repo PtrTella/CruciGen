@@ -14,5 +14,7 @@ export const state = {
   cipherMap: {}, // Mappa Lettera -> Numero (es: 'A' -> 1)
   cipherRevMap: {}, // Mappa Numero -> Lettera (es: 1 -> 'A')
   revealedNumbers: new Set(), // Numeri cifrati pre-rivelati (parola indizio)
-  userMapping: {} // Numero -> Lettera dell'utente (es: 2 -> 'E')
+  userMapping: {}, // Numero -> Lettera dell'utente (es: 2 -> 'E')
+  startWordCoordinates: new Set(), // Set di coordinate "r,c" della parola indizio iniziale
+  animationTimeouts: [] // Timer attivi dell'animazione di rivelazione da pulire all'occorrenza
 };

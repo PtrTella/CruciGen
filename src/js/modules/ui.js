@@ -60,6 +60,9 @@ export function renderGrid() {
 
           if (state.revealedNumbers.has(cipherNum)) {
             cellEl.classList.add("pre-filled");
+            if (state.startWordCoordinates.has(`${r},${c}`)) {
+              cellEl.classList.add("starting-word");
+            }
             inputEl.value = char;
             inputEl.dataset.oldVal = char;
             inputEl.readOnly = true;
@@ -291,4 +294,76 @@ export function renderLegend() {
     legendItem.appendChild(inputEl);
     dom.legendGridContainer.appendChild(legendItem);
   }
+}
+
+export function animateClueWordReveal(bestClue) {
+  const word = bestClue.word.toUpperCase();
+  const cells = bestClue.cells;
+
+  log(`Avvio animazione di digitazione indizio iniziale: "${word}"`);
+
+  // Pulisci timer esistenti
+  state.animationTimeouts.forEach(clearTimeout);
+  state.animationTimeouts = [];
+
+  // 1. Digita la parola iniziale lettera per lettera
+  cells.forEach(([r, c], i) => {
+    const timeoutId = setTimeout(() => {
+      const cellEl = document.querySelector(`.cell[data-row="${r}"][data-col="${c}"]`);
+      if (!cellEl) return;
+      const inputEl = cellEl.querySelector("input");
+      if (!inputEl) return;
+
+      cellEl.classList.add("pre-filled", "starting-word", "cell-glow-animate");
+      inputEl.value = word[i];
+      inputEl.dataset.oldVal = word[i];
+      inputEl.readOnly = true;
+    }, i * 300);
+
+    state.animationTimeouts.push(timeoutId);
+  });
+
+  // 2. Quando la digitazione è completata, propaga le lettere a tutto lo schema
+  const propagationTimeoutId = setTimeout(() => {
+    log("Digitazione parola indizio completata. Propagazione delle lettere nel resto dello schema...");
+
+    // Popola lo stato
+    for (let char of word) {
+      const num = state.cipherMap[char];
+      state.revealedNumbers.add(num);
+      state.userMapping[num] = char;
+    }
+
+    // Aggiorna la Legenda
+    document.querySelectorAll(".legend-input").forEach(li => {
+      const cipher = parseInt(li.dataset.cipher);
+      if (state.revealedNumbers.has(cipher)) {
+        li.value = state.cipherRevMap[cipher];
+        li.disabled = true;
+      }
+    });
+
+    // Propaga alle altre caselle con animazione
+    for (let char of word) {
+      const num = state.cipherMap[char];
+      document.querySelectorAll(`.cell-input[data-cipher="${num}"]`).forEach(inputEl => {
+        const cellEl = inputEl.closest(".cell");
+        const r = parseInt(inputEl.dataset.row);
+        const c = parseInt(inputEl.dataset.col);
+
+        // Se non fa parte della parola iniziale, la popoliamo ora con animazione
+        if (!state.startWordCoordinates.has(`${r},${c}`)) {
+          cellEl.classList.add("pre-filled");
+          inputEl.value = char;
+          inputEl.dataset.oldVal = char;
+          inputEl.readOnly = true;
+          
+          inputEl.classList.add("cipher-spread-animate");
+          cellEl.classList.add("cell-glow-animate");
+        }
+      });
+    }
+  }, cells.length * 300);
+
+  state.animationTimeouts.push(propagationTimeoutId);
 }

@@ -219,7 +219,9 @@ function generateCrossword(template) {
       clue: clueText,
       row: slot.cells[0][0],
       col: slot.cells[0][1],
-      length: slot.length
+      length: slot.length,
+      cells: slot.cells,
+      direction: slot.direction
     };
 
     if (slot.direction === "H") {

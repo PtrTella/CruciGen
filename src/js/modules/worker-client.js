@@ -4,7 +4,7 @@
 import { state } from "./state.js";
 import { dom } from "./dom.js";
 import { log } from "./logger.js";
-import { showLoader, hideLoader, renderGrid, renderClues, focusFirstCell } from "./ui.js";
+import { showLoader, hideLoader, renderGrid, renderClues, focusFirstCell, animateClueWordReveal } from "./ui.js";
 
 export function initWorker() {
   log("Inizializzazione Web Worker...");
@@ -32,6 +32,9 @@ export function initWorker() {
       renderGrid();
       renderClues();
       focusFirstCell();
+      if (state.gameMode === "encrypted" && state.currentClueWord) {
+        animateClueWordReveal(state.currentClueWord);
+      }
     } else if (status === "failed") {
       log(`[WARNING] Il risolutore ha fallito l'incastro per questo layout.`);
       const maxAtt = (typeof CRUCIGEN_CONFIG !== 'undefined' && CRUCIGEN_CONFIG.maxGenerationAttempts) || 5;
@@ -75,6 +78,11 @@ export async function loadDictionary() {
 
 export function generateNewCrossword(isRetry = false) {
   if (!state.dictionaryLoaded) return;
+  
+  // Pulisci eventuali animazioni in corso prima della nuova generazione
+  state.animationTimeouts.forEach(clearTimeout);
+  state.animationTimeouts = [];
+
   showLoader("Generazione schema in corso...");
 
   if (isRetry !== true) {
@@ -170,6 +178,7 @@ function initEncryptedCrossword(result) {
 
   state.revealedNumbers.clear();
   state.userMapping = {};
+  state.startWordCoordinates.clear();
 
   // Rileva tutti i numeri da 1 a uniqueLetters.length e inizializza userMapping a ""
   for (let i = 1; i <= uniqueLetters.length; i++) {
@@ -178,11 +187,9 @@ function initEncryptedCrossword(result) {
 
   if (bestClue) {
     log(`Parola indizio selezionata per cifratura iniziale: "${bestClue.word}" (punteggio occorrenza: ${bestScore})`);
-    const word = bestClue.word.toUpperCase();
-    for (let char of word) {
-      const num = state.cipherMap[char];
-      state.revealedNumbers.add(num);
-      state.userMapping[num] = char;
-    }
+    state.startWordCoordinates = new Set(bestClue.cells.map(([r, c]) => `${r},${c}`));
+    state.currentClueWord = bestClue;
+  } else {
+    state.currentClueWord = null;
   }
 }
