@@ -1,29 +1,22 @@
 // config.js
 
-// Generatore matematico della Curva Gaussiana
-function generateGaussScores() {
+// Generatore Gaussiana per slot length scoring
+// center: lunghezza ideale degli slot (picco della campana)
+// peakHeight: punteggio massimo al picco
+// width: larghezza della campana (più alto = più piatta)
+function generateGaussScores(center = 7.5, peakHeight = 45, width = 8) {
   const scores = {};
-
-  // Parametri della campana
-  const peakHeight = 45; // Altezza massima della campana (Punteggio max)
-  const center = 7.5;    // Centro della campana (esattamente tra 7 e 8)
-  const width = 8;       // "Ampiezza" della campana (più è alto, più 5 e 10 prendono punti)
-
   for (let len = 1; len <= 15; len++) {
-    // Formula della Distribuzione Normale (Gaussiana)
     let score = Math.round(peakHeight * Math.exp(-Math.pow(len - center, 2) / width));
+    score -= 10;                        // Abbassa la baseline per penalizzare le code
 
-    // Abbassiamo l'asse X di 10 punti per far andare in negativo le code
-    score -= 10;
-
-    // Regole di sicurezza assolute (Overrides)
-    if (len === 1) score = -100; // Forte penalità per parole solo veritcali o orizzontali prima gli incorci
-    if (len === 2) score = -25;  // Penalità fissa per le 2 lettere (troppo rischiose per stalli)
-    if (len >= 13) score -= 10;  // Extra malus per 13+ (il dizionario ne ha pochissime)
+    // Regole assolute di sicurezza
+    if (len === 1)  score = -100;       // Slot singoli: fortemente penalizzati
+    if (len === 2)  score = -25;        // Slot da 2: rischiosi per il backtracking
+    if (len >= 13)  score -= 10;        // Slot lunghissimi: dizionario molto scarso
 
     scores[len] = score;
   }
-
   return scores;
 }
 
@@ -42,16 +35,28 @@ const CRUCIGEN_CONFIG = {
   // medium → bilanciato
   // hard  → meno nere → slot lunghi → parole rare lunghe
   blackSquarePercentByDifficulty: {
-    easy:   0.23,                     // 23% caselle nere
-    medium: 0.17,                     // 17% caselle nere
-    hard:   0.12                      // 12% caselle nere
+    easy: 0.23,                     // 23% caselle nere
+    medium: 0.17,                   // 17% caselle nere
+    hard: 0.12                      // 12% caselle nere
   },
   // Soglie rating parola per i pool preferred/fallback (0.0 = facilissima, 1.0 = difficilissima)
   difficultyThresholds: {
     easy: 0.35,                       // Sotto questa soglia → parola "facile"
     hard: 0.65                        // Sopra questa soglia → parola "difficile"
   },
-  lengthScores: generateGaussScores() // Punteggi lunghezze parole (Gaussiana)
+  // Frazioni della larghezza griglia per il centro della Gaussiana.
+  // Il centro viene calcolato come: Math.round(N_cols × fraction)
+  // così si adatta automaticamente a tutte le dimensioni griglia:
+  //   9x9  → easy=4.5  medium=6   hard=7.2
+  //   11x11 → easy=5.5  medium=7.4 hard=8.8
+  //   13x13 → easy=6.5  medium=8.7 hard=10.4
+  //   15x15 → easy=7.5  medium=10  hard=12
+  lengthCenterFractions: {
+    easy:   0.50,   // picco a metà griglia (parole brevi, incroci facili)
+    medium: 0.67,   // picco a 2/3 della griglia (cruciverba classico)
+    hard:   0.80    // picco a 4/5 della griglia (parole lunghe, difficili)
+  }
+
 };
 
 // Rendiamo l'oggetto accessibile globalmente nei diversi contesti

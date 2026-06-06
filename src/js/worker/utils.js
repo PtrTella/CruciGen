@@ -15,12 +15,14 @@ function calculateWordScore(word, len) {
   const uniqueLetters = new Set(word).size;
   score += (uniqueLetters / len) * 10;
 
-  // Preferisci parole con difficoltà minore (più facili/comuni)
+  // Formato compatto: entry = [difficulty, [clues], pos]
   let difficulty = 0.5;
   if (typeof dictionary !== 'undefined' && dictionary) {
     const entry = dictionary[len.toString()][word];
-    if (entry && typeof entry === 'object' && 'difficulty' in entry) {
-      difficulty = entry.difficulty;
+    if (Array.isArray(entry)) {
+      difficulty = entry[0];            // entry[0] = difficulty
+    } else if (entry && 'difficulty' in entry) {
+      difficulty = entry.difficulty;    // retrocompatibilità formato vecchio
     }
   }
   // Sottraiamo valore al punteggio in base alla difficoltà (0.0 è facilissima, 1.0 difficilissima)

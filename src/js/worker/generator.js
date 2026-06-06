@@ -57,26 +57,17 @@ function generateGridTopology(rows, cols, targetDifficulty) {
 
 // Logica completa di valutazione della griglia (Gaussiana + Flood Fill di connettività + penalty ibride)
 function evaluateGridFitness(grid, rows, cols, targetDifficulty) {
-  const lengthScores = (typeof CRUCIGEN_CONFIG !== 'undefined' && CRUCIGEN_CONFIG.lengthScores) || {};
+  // Centro della Gaussiana = fraction × cols, adattato alla dimensione reale della griglia.
+  // Le frazioni sono in config.js → lengthCenterFractions.
+  const cfg = (typeof CRUCIGEN_CONFIG !== 'undefined') ? CRUCIGEN_CONFIG : {};
+  const fractions = cfg.lengthCenterFractions || { easy: 0.50, medium: 0.67, hard: 0.80 };
+  const fraction  = fractions[targetDifficulty] || fractions.medium;
+  const center    = Math.max(3, Math.round(cols * fraction));
+  const lengthScores = generateGaussScores(center);   // generateGaussScores è in config.js
 
   let score = 0;
   let totalWhiteCells = 0;
   let firstWhite = null;
-
-  // Bonus addizionale per slot della lunghezza "target" in base alla difficoltà:
-  //   easy → premia slot di 4-6 lettere, penalizza 8+
-  //   hard → premia slot di 7-9 lettere, penalizza 1-4
-  function difficultyLengthBonus(len) {
-    if (targetDifficulty === 'easy') {
-      if (len >= 4 && len <= 6) return 20;
-      if (len >= 7) return -10 * (len - 6);
-    } else if (targetDifficulty === 'hard') {
-      if (len >= 7 && len <= 9) return 20;
-      if (len >= 10) return -5 * (len - 9);
-      if (len <= 4) return -10 * (5 - len);
-    }
-    return 0;
-  }
 
   // Analisi slot Orizzontali
   for (let r = 0; r < rows; r++) {
@@ -88,12 +79,12 @@ function evaluateGridFitness(grid, rows, cols, targetDifficulty) {
         if (!firstWhite) firstWhite = { r, c };
       } else {
         if (len > 0) {
-          score += (lengthScores[len] !== undefined ? lengthScores[len] : 0) + difficultyLengthBonus(len);
+          score += lengthScores[len] !== undefined ? lengthScores[len] : 0;
           len = 0;
         }
       }
     }
-    if (len > 0) score += (lengthScores[len] !== undefined ? lengthScores[len] : 0) + difficultyLengthBonus(len);
+    if (len > 0) score += lengthScores[len] !== undefined ? lengthScores[len] : 0;
   }
 
   // Analisi slot Verticali
@@ -104,13 +95,14 @@ function evaluateGridFitness(grid, rows, cols, targetDifficulty) {
         len++;
       } else {
         if (len > 0) {
-          score += (lengthScores[len] !== undefined ? lengthScores[len] : 0) + difficultyLengthBonus(len);
+          score += lengthScores[len] !== undefined ? lengthScores[len] : 0;
           len = 0;
         }
       }
     }
-    if (len > 0) score += (lengthScores[len] !== undefined ? lengthScores[len] : 0) + difficultyLengthBonus(len);
+    if (len > 0) score += lengthScores[len] !== undefined ? lengthScores[len] : 0;
   }
+
 
   if (totalWhiteCells === 0) return -Infinity;
 

@@ -140,9 +140,12 @@ function generateCrossword(template, targetDifficulty) {
     const lenStr = currentSlot.length.toString();
     const lenBucket = (typeof dictionary !== 'undefined') ? dictionary[lenStr] : null;
 
+    // Formato compatto: entry = [difficulty, [clues], pos]
     function getWordDifficulty(word) {
       const entry = lenBucket && lenBucket[word];
-      return (entry && entry.difficulty != null) ? entry.difficulty : 0.5;
+      if (Array.isArray(entry))         return entry[0];            // nuovo formato
+      if (entry && 'difficulty' in entry) return entry.difficulty;  // formato legacy
+      return 0.5;
     }
 
     let orderedCandidates;
@@ -254,12 +257,16 @@ function generateCrossword(template, targetDifficulty) {
     const lenBucket = dictionary[slot.length.toString()];
     const dictEntry = lenBucket && slot.word ? lenBucket[slot.word] : null;
     let clueText = "Nessuna definizione disponibile.";
-    let pos = (dictEntry && typeof dictEntry === 'object' && dictEntry.pos) ? dictEntry.pos : null;
-
+    let pos = null;
     if (dictEntry) {
-      const clues = Array.isArray(dictEntry) ? dictEntry : (dictEntry.clues || []);
-      if (clues.length > 0) {
-        clueText = clues[Math.floor(Math.random() * clues.length)];
+      if (Array.isArray(dictEntry)) {
+        pos = dictEntry[2] ?? null;                     // entry[2] = pos
+        const clues = dictEntry[1] || [];               // entry[1] = clues
+        if (clues.length > 0) clueText = clues[Math.floor(Math.random() * clues.length)];
+      } else {
+        pos = (typeof dictEntry === 'object' && dictEntry.pos) ? dictEntry.pos : null;
+        const clues = dictEntry.clues || [];
+        if (clues.length > 0) clueText = clues[Math.floor(Math.random() * clues.length)];
       }
     }
 
@@ -291,9 +298,12 @@ function generateCrossword(template, targetDifficulty) {
   slots.forEach(slot => {
     const lenBucket = dictionary[slot.length.toString()];
     const dictEntry = lenBucket && slot.word ? lenBucket[slot.word] : null;
-    if (dictEntry && typeof dictEntry === 'object' && 'difficulty' in dictEntry) {
-      totalDifficulty += dictEntry.difficulty;
-      wordCount++;
+    if (dictEntry) {
+      const diff = Array.isArray(dictEntry) ? dictEntry[0] : dictEntry.difficulty;
+      if (typeof diff === 'number') {
+        totalDifficulty += diff;
+        wordCount++;
+      }
     }
   });
   const avgDifficulty = wordCount > 0 ? (totalDifficulty / wordCount) : 0.25;

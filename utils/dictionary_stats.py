@@ -31,13 +31,18 @@ def main():
         unmatched_samples = []
 
         for word, val in words.items():
-            # Support both old format [clues] and new format {"clues":..., "pos":...}
-            if isinstance(val, dict):
+            # Supporta sia il vecchio formato oggetto che il nuovo formato array compatto:
+            #   vecchio: {"clues": [...], "difficulty": x, "pos": "n"}
+            #   nuovo:   [difficulty, [clues], pos]
+            if isinstance(val, list):
+                clues_count = len(val[1]) if len(val) > 1 and isinstance(val[1], list) else 0
+                pos         = val[2] if len(val) > 2 else None
+            elif isinstance(val, dict):
                 clues_count = len(val.get("clues", []))
-                pos = val.get("pos")
+                pos         = val.get("pos")
             else:
-                clues_count = len(val)
-                pos = None
+                clues_count = 0
+                pos         = None
                 
             clues_for_len += clues_count
             total_clues += clues_count
