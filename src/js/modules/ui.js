@@ -118,13 +118,7 @@ export function renderClues() {
       li.dataset.num = clue.num;
       li.dataset.dir = "H";
       
-      let posTag = "";
-      if (clue.pos) {
-        const labels = { "n": "sost.", "v": "verb.", "a": "agg." };
-        posTag = `<span class="pos-badge">${labels[clue.pos] || clue.pos}</span> `;
-      }
-
-      li.innerHTML = `<span class="clue-num">${clue.num}</span> ${posTag}${clue.clue}`;
+      li.innerHTML = `<span class="clue-num">${clue.num}</span> ${clue.clue}`;
       li.addEventListener("click", () => handleClueClick(clue, "H"));
       dom.listHorizontal.appendChild(li);
     });
@@ -134,13 +128,7 @@ export function renderClues() {
       li.dataset.num = clue.num;
       li.dataset.dir = "V";
 
-      let posTag = "";
-      if (clue.pos) {
-        const labels = { "n": "sost.", "v": "verb.", "a": "agg." };
-        posTag = `<span class="pos-badge">${labels[clue.pos] || clue.pos}</span> `;
-      }
-
-      li.innerHTML = `<span class="clue-num">${clue.num}</span> ${posTag}${clue.clue}`;
+      li.innerHTML = `<span class="clue-num">${clue.num}</span> ${clue.clue}`;
       li.addEventListener("click", () => handleClueClick(clue, "V"));
       dom.listVertical.appendChild(li);
     });
@@ -249,9 +237,7 @@ export function updateHighlights(row, col) {
     dom.mobileBadge.innerText = state.activeDirection === "H" ? "ORIZ" : "VERT";
     dom.mobileBadge.className = `clue-direction-badge ${state.activeDirection === "H" ? "" : "vert"}`;
     
-    const labels = { "n": "sost.", "v": "verb.", "a": "agg." };
-    const posTagText = currentClue.pos ? `[${labels[currentClue.pos] || currentClue.pos}] ` : "";
-    dom.mobileClueText.innerText = `${currentClue.num}. ${posTagText}${currentClue.clue}`;
+    dom.mobileClueText.innerText = `${currentClue.num}. ${currentClue.clue}`;
   }
 
   // Evidenzia l'indizio d'incrocio nell'altra lista
@@ -404,10 +390,10 @@ export function updateDifficultyBadge() {
   let label = "";
   let className = "";
   
-  if (diff < 0.35) {
+  if (diff < 0.32) {
     label = "Facile";
     className = "easy";
-  } else if (diff < 0.55) {
+  } else if (diff < 0.50) {
     label = "Medio";
     className = "medium";
   } else {

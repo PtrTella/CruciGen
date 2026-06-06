@@ -1,0 +1,22 @@
+import json
+import os
+
+DICTIONARY_PATH = "/Users/tella/Workspace/CruciGen/src/assets/dictionary.json"
+
+with open(DICTIONARY_PATH, "r", encoding="utf-8") as f:
+    dictionary = json.load(f)
+
+# We want to recalculate the difficulty of all words
+# Wait, the dictionary does not store the original Zipf score.
+# But since difficulty was computed as:
+# difficulty = 1.0 - (zipf / 7.0) + bonus_complessita
+# We can estimate the zipf score from difficulty and bonus_complessita!
+# Or even simpler: we can just reconstruct the zipf and recalculate,
+# or we can run a script that does the rescaling using the formula:
+# new_diff = ((diff - bonus) * ...)
+# Wait! Instead of trying to estimate it back, we can just run compile_difficulty.py!
+# Let's view compile_difficulty.py to see if it parses itWaC and dictionary.json.
+# Yes! compile_difficulty.py loads the raw dictionary.json, matches words to itWaC,
+# computes difficulty, and saves it back to dictionary.json!
+# So we can just edit compile_difficulty.py with the new formula, and then RUN compile_difficulty.py!
+# This is extremely clean and correct!

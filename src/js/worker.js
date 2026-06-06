@@ -1,12 +1,15 @@
 // src/js/worker.js
 // Web Worker per la generazione dinamica della topologia e risoluzione via backtracking search.
 
+const queryParams = new URLSearchParams(self.location.search);
+const version = queryParams.get("v") || new Date().getTime();
+
 importScripts(
-  "config.js",
-  "worker/trie.js",
-  "worker/utils.js",
-  "worker/generator.js",
-  "worker/solver.js"
+  "config.js?v=" + version,
+  "worker/trie.js?v=" + version,
+  "worker/utils.js?v=" + version,
+  "worker/generator.js?v=" + version,
+  "worker/solver.js?v=" + version
 );
 
 dictionary = null;

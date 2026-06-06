@@ -31,16 +31,16 @@ const CRUCIGEN_CONFIG = {
   maxGenerationAttempts: 30,          // Max tentativi rigenerazione layout
   gridTopologyCandidates: 200,        // Candidati topologia valutati
   maxStepsBySize: {                   // Passi backtracking per dimensione
-    9: 1000,                          // 9x9
-    11: 2000,                         // 11x11
-    13: 4500,                         // 13x13
-    15: 8000                          // 15x15
+    9: 15000,                         // 9x9
+    11: 25000,                        // 11x11
+    13: 35000,                        // 13x13
+    15: 45000                         // 15x15
   },
   candidateJitterWindow: 80,          // Parole top rimescolate per varietà
   blackSquareTargetMultiplier: 0.17,  // % ideale caselle nere (0.17 = 17%)
   lengthScores: generateGaussScores(), // Punteggi lunghezze parole (Gaussiana)
   difficultyWeights: {
-    easyBiasMultiplier: 100,          // Moltiplicatore spinta per parole facili
+    easyBiasMultiplier: 500,          // Moltiplicatore spinta per parole facili
     hardBiasMultiplier: 100           // Moltiplicatore spinta per parole difficili
   }
 };

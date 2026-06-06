@@ -226,7 +226,11 @@ def main():
                 pos = None
                 
             # Compute difficulty
-            difficolta_statistica = 1.0 - (zipf / 7.0)
+            # We map Zipf scores to difficulty using a non-linear mapping where:
+            # Zipf >= 5.0 -> 0.0 difficulty
+            # Zipf = 1.5 -> 1.0 difficulty
+            raw_diff = (5.0 - zipf) / 3.5 if zipf < 5.0 else 0.0
+            difficolta_statistica = (raw_diff ** 1.5) if raw_diff > 0 else 0.0
             
             # Hard letters penalty
             lettere_ostiche = set("hqzxywk")

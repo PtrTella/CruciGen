@@ -6,10 +6,16 @@ function getDynamicScore(word, len, targetDifficulty) {
 
   let difficulty = 0.5;
   if (typeof dictionary !== 'undefined' && dictionary) {
-    const entry = dictionary[len.toString()][word];
+    const lenBucket = dictionary[len.toString()];
+    const entry = lenBucket && lenBucket[word];
     if (entry && typeof entry === 'object' && 'difficulty' in entry) {
       difficulty = entry.difficulty;
     }
+  }
+
+  // Se la parola ha lunghezza <= 3, la trattiamo come "facile" per evitare stalli sul backtracking
+  if (len <= 3) {
+    difficulty = 0.1;
   }
 
   const easyMult = (typeof CRUCIGEN_CONFIG !== 'undefined' && CRUCIGEN_CONFIG.difficultyWeights && CRUCIGEN_CONFIG.difficultyWeights.easyBiasMultiplier) || 100;
@@ -138,11 +144,15 @@ function generateCrossword(template, targetDifficulty) {
       }
     }
 
+
     if (bestIdx === -1) return false;
 
-    const temp = slots[slotIndex];
-    slots[slotIndex] = slots[bestIdx];
-    slots[bestIdx] = temp;
+    // Swap solo se necessario (evita doppio swap quando bestIdx === slotIndex)
+    if (bestIdx !== slotIndex) {
+      const temp = slots[slotIndex];
+      slots[slotIndex] = slots[bestIdx];
+      slots[bestIdx] = temp;
+    }
 
     const currentSlot = slots[slotIndex];
 
@@ -184,9 +194,12 @@ function generateCrossword(template, targetDifficulty) {
       }
     }
 
-    const tempBack = slots[slotIndex];
-    slots[slotIndex] = slots[bestIdx];
-    slots[bestIdx] = tempBack;
+    // Ripristina lo swap (solo se era stato fatto)
+    if (bestIdx !== slotIndex) {
+      const tempBack = slots[slotIndex];
+      slots[slotIndex] = slots[bestIdx];
+      slots[bestIdx] = tempBack;
+    }
 
     return false;
   }
@@ -229,7 +242,8 @@ function generateCrossword(template, targetDifficulty) {
   const verticalClues = [];
 
   slots.forEach(slot => {
-    const dictEntry = dictionary[slot.length.toString()][slot.word];
+    const lenBucket = dictionary[slot.length.toString()];
+    const dictEntry = lenBucket && slot.word ? lenBucket[slot.word] : null;
     let clueText = "Nessuna definizione disponibile.";
     let pos = (dictEntry && typeof dictEntry === 'object' && dictEntry.pos) ? dictEntry.pos : null;
 
@@ -266,7 +280,8 @@ function generateCrossword(template, targetDifficulty) {
   let totalDifficulty = 0;
   let wordCount = 0;
   slots.forEach(slot => {
-    const dictEntry = dictionary[slot.length.toString()][slot.word];
+    const lenBucket = dictionary[slot.length.toString()];
+    const dictEntry = lenBucket && slot.word ? lenBucket[slot.word] : null;
     if (dictEntry && typeof dictEntry === 'object' && 'difficulty' in dictEntry) {
       totalDifficulty += dictEntry.difficulty;
       wordCount++;

@@ -16,6 +16,9 @@ function initApp() {
   if (dom.selectMode) {
     state.gameMode = dom.selectMode.value;
   }
+  if (dom.selectDifficulty) {
+    state.targetDifficulty = dom.selectDifficulty.value;
+  }
   initTheme();
   setupEventListeners();
   initWorker();

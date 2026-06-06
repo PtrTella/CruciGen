@@ -4,13 +4,13 @@
 function generateGridTopology(rows, cols) {
   let bestGrid = null;
   let bestScore = -Infinity;
-  const maxAttempts = CRUCIGEN_CONFIG.gridTopologyCandidates || 300;
+  const maxAttempts = (typeof CRUCIGEN_CONFIG !== 'undefined' && CRUCIGEN_CONFIG.gridTopologyCandidates) || 300;
 
   for (let i = 0; i < maxAttempts; i++) {
     let grid = Array(rows).fill(null).map(() => Array(cols).fill(' '));
 
     // Target ideale di caselle nere usando la configurazione globale
-    const blackSquareTarget = Math.floor((rows * cols) * CRUCIGEN_CONFIG.blackSquareTargetMultiplier);
+    const blackSquareTarget = Math.floor((rows * cols) * ((typeof CRUCIGEN_CONFIG !== 'undefined' && CRUCIGEN_CONFIG.blackSquareTargetMultiplier) || 0.16));
     let blackSquares = 0;
 
     while (blackSquares < blackSquareTarget) {
@@ -19,7 +19,7 @@ function generateGridTopology(rows, cols) {
 
       if (grid[r][c] === ' ') {
         grid[r][c] = '#';
-        // Applica simmetria rotazionale speculare a 180° (Stile classico)
+        // Applica simmetria rotazionale speculare a 180° (stile classico)
         if (grid[rows - 1 - r][cols - 1 - c] === ' ') {
           grid[rows - 1 - r][cols - 1 - c] = '#';
           blackSquares++;
@@ -28,13 +28,12 @@ function generateGridTopology(rows, cols) {
       }
     }
 
+    // Ripara le celle bianche isolate (senza parole orizzontali NÉ verticali)
     for (let r = 0; r < rows; r++) {
       for (let c = 0; c < cols; c++) {
         if (grid[r][c] === ' ') {
           let isH1 = (c === 0 || grid[r][c - 1] === '#') && (c === cols - 1 || grid[r][c + 1] === '#');
           let isV1 = (r === 0 || grid[r - 1][c] === '#') && (r === rows - 1 || grid[r + 1][c] === '#');
-
-          // AND Logico: Ripara solo se è un quadrato bianco intrappolato ovunque
           if (isH1 && isV1) {
             grid[r][c] = '#';
           }
@@ -48,12 +47,13 @@ function generateGridTopology(rows, cols) {
       bestGrid = grid;
     }
   }
+
   return bestGrid;
 }
 
 // Logica completa di valutazione della griglia (Gaussiana + Flood Fill di connettività)
 function evaluateGridFitness(grid, rows, cols) {
-  const lengthScores = CRUCIGEN_CONFIG.lengthScores;
+  const lengthScores = (typeof CRUCIGEN_CONFIG !== 'undefined' && CRUCIGEN_CONFIG.lengthScores) || {};
 
   let score = 0;
   let totalWhiteCells = 0;
@@ -123,5 +123,44 @@ function evaluateGridFitness(grid, rows, cols) {
     return -Infinity;
   }
 
+  // 1. Penalizzazione per aree interamente bianche (3x3 per griglie <= 11, 4x4 per griglie >= 13)
+  const blockSize = rows <= 11 ? 3 : 4;
+  for (let r = 0; r <= rows - blockSize; r++) {
+    for (let c = 0; c <= cols - blockSize; c++) {
+      let allWhite = true;
+      outer: for (let dr = 0; dr < blockSize; dr++) {
+        for (let dc = 0; dc < blockSize; dc++) {
+          if (grid[r + dr][c + dc] === '#') { allWhite = false; break outer; }
+        }
+      }
+      if (allWhite) score -= 150;
+    }
+  }
+
+  // 2. Penalizzazione per caselle nere sui bordi esterni (tende a produrre slot più corti)
+  for (let c = 0; c < cols; c++) {
+    if (grid[0][c] === '#') score -= 25;
+    if (grid[rows - 1][c] === '#') score -= 25;
+  }
+  for (let r = 1; r < rows - 1; r++) {
+    if (grid[r][0] === '#') score -= 25;
+    if (grid[r][cols - 1] === '#') score -= 25;
+  }
+
+  // 3. Penalizzazione per agglomerati di caselle nere adiacenti
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      if (grid[r][c] === '#') {
+        let adj = 0;
+        for (const [dr, dc] of [[-1,0],[1,0],[0,-1],[0,1]]) {
+          const nr = r + dr, nc = c + dc;
+          if (nr >= 0 && nr < rows && nc >= 0 && nc < cols && grid[nr][nc] === '#') adj++;
+        }
+        if (adj >= 2) score -= 20 * adj;
+      }
+    }
+  }
+
   return score;
+
 }
