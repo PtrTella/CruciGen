@@ -2,14 +2,23 @@
 // Generatore procedurale di geometrie simmetriche con vincoli gaussiani per il Web Worker.
 
 function generateGridTopology(rows, cols, targetDifficulty) {
+  if (!rows || !cols || !targetDifficulty) {
+    throw new Error(`[GENERATOR] Invalid parameters: rows=${rows}, cols=${cols}, targetDifficulty=${targetDifficulty}`);
+  }
+  const size = Math.max(rows, cols);
+  if (size !== 9 && size !== 11 && size !== 13 && size !== 15) {
+    throw new Error(`[GENERATOR] Unsupported grid size: ${size}`);
+  }
+  if (targetDifficulty !== 'easy' && targetDifficulty !== 'medium' && targetDifficulty !== 'hard') {
+    throw new Error(`[GENERATOR] Unsupported target difficulty: ${targetDifficulty}`);
+  }
+
   let bestGrid = null;
   let bestScore = -Infinity;
-  const maxAttempts = (typeof CRUCIGEN_CONFIG !== 'undefined' && CRUCIGEN_CONFIG.gridTopologyCandidates) || 300;
+  const maxAttempts = CRUCIGEN_CONFIG.gridTopologyCandidates;
 
   // Percentuale assoluta di caselle nere per ogni difficoltà, letta dal config
-  const cfg = (typeof CRUCIGEN_CONFIG !== 'undefined') ? CRUCIGEN_CONFIG : {};
-  const percentByDiff = cfg.blackSquarePercentByDifficulty || { easy: 0.23, medium: 0.17, hard: 0.12 };
-  const blackPercent = percentByDiff[targetDifficulty] || percentByDiff.medium || 0.17;
+  const blackPercent = CRUCIGEN_CONFIG.getBlackSquarePercent(size, targetDifficulty);
   const blackSquareTarget = Math.floor(rows * cols * blackPercent);
 
 
@@ -59,9 +68,7 @@ function generateGridTopology(rows, cols, targetDifficulty) {
 function evaluateGridFitness(grid, rows, cols, targetDifficulty) {
   // Centro della Gaussiana = fraction × cols, adattato alla dimensione reale della griglia.
   // Le frazioni sono in config.js → lengthCenterFractions.
-  const cfg = (typeof CRUCIGEN_CONFIG !== 'undefined') ? CRUCIGEN_CONFIG : {};
-  const fractions = cfg.lengthCenterFractions || { easy: 0.50, medium: 0.67, hard: 0.80 };
-  const fraction  = fractions[targetDifficulty] || fractions.medium;
+  const fraction  = CRUCIGEN_CONFIG.lengthCenterFractions[targetDifficulty];
   const center    = Math.max(3, Math.round(cols * fraction));
   const lengthScores = generateGaussScores(center);   // generateGaussScores è in config.js
 

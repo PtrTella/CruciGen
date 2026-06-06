@@ -6,6 +6,13 @@ function getBaseScore(word) {
 
 
 function generateCrossword(template, targetDifficulty) {
+  if (!template || !targetDifficulty) {
+    throw new Error(`[SOLVER] Invalid parameters: template=${template}, targetDifficulty=${targetDifficulty}`);
+  }
+  if (targetDifficulty !== 'easy' && targetDifficulty !== 'medium' && targetDifficulty !== 'hard') {
+    throw new Error(`[SOLVER] Unsupported target difficulty: ${targetDifficulty}`);
+  }
+
   const rows = template.length;
   const cols = template[0].length;
 
@@ -72,12 +79,9 @@ function generateCrossword(template, targetDifficulty) {
     slot.patternIndices = slot.cells.map(([r, c]) => ({ r, c }));
   });
 
-  // Soglia di passi dinamica: dimensione × moltiplicatore difficoltà
-  // hard usa parole più rare → più backtracking → più passi necessari
+  // Soglia di passi dinamica calcolata dal config
   const sizeKey = Math.max(rows, cols);
-  const baseSteps = (CRUCIGEN_CONFIG.maxStepsBySize && CRUCIGEN_CONFIG.maxStepsBySize[sizeKey]) || 3000;
-  const diffMultiplier = targetDifficulty === 'hard' ? 1.5 : (targetDifficulty === 'easy' ? 0.8 : 1.0);
-  const maxSteps = Math.round(baseSteps * diffMultiplier);
+  const maxSteps = CRUCIGEN_CONFIG.getBacktrackingSteps(sizeKey, targetDifficulty);
   const usedWords = new Set();
   let steps = 0;
 
@@ -157,7 +161,7 @@ function generateCrossword(template, targetDifficulty) {
     if (targetDifficulty === 'easy' || targetDifficulty === 'hard') {
       const preferred = [];
       const fallback  = [];
-      const thresholds = (typeof CRUCIGEN_CONFIG !== 'undefined' && CRUCIGEN_CONFIG.difficultyThresholds) || { easy: 0.35, hard: 0.65 };
+      const thresholds = CRUCIGEN_CONFIG.difficultyThresholds;
       const threshold = targetDifficulty === 'easy' ? thresholds.easy : thresholds.hard;
 
 
@@ -179,7 +183,7 @@ function generateCrossword(template, targetDifficulty) {
       orderedCandidates = preferred.concat(fallback);
     } else {
       // Medium: ordinamento con jitter standard
-      const baseJitter = CRUCIGEN_CONFIG.candidateJitterWindow || 80;
+      const baseJitter = CRUCIGEN_CONFIG.candidateJitterWindow;
       bestCandidates.sort((a, b) => getBaseScore(b) - getBaseScore(a));
       const topPart = bestCandidates.slice(0, baseJitter);
       topPart.sort((a, b) => (getBaseScore(b) + Math.random() * 3) - (getBaseScore(a) + Math.random() * 3));
