@@ -30,9 +30,9 @@ const CRUCIGEN_CONFIG = {
   // Aumentati rispetto ai valori precedenti per supportare 13x13 e 15x15.
   maxStepsBySize: {
     9: 2000,   // 9x9   (era 15000)
-    11: 4000,   // 11x11 (era 25000)
-    13: 6500,   // 13x13 (era 35000)
-    15: 1000    // 15x15 (era 45000)
+    11: 2000,   // 11x11 (era 25000)
+    13: 200,   // 13x13 (era 35000)
+    15: 2000    // 15x15 (era 45000)
   },
 
   // Finestra di jitter: quante parole top vengono rimescolate prima della selezione.

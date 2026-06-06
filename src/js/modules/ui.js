@@ -6,9 +6,16 @@ import { state } from "./state.js";
 import { log } from "./logger.js";
 
 // Controlli del loader
-export function showLoader(text) {
+export function showLoader(text, showCancel = false) {
   dom.loaderText.innerText = text;
   dom.loader.classList.remove("hidden");
+  if (dom.btnCancelGeneration) {
+    if (showCancel) {
+      dom.btnCancelGeneration.classList.remove("hidden");
+    } else {
+      dom.btnCancelGeneration.classList.add("hidden");
+    }
+  }
 }
 
 export function hideLoader() {

@@ -1,5 +1,5 @@
 // sw.js - Service Worker for CruciGen offline gaming and PWA support
-const CACHE_NAME = "crucigen-cache-v33";
+const CACHE_NAME = "crucigen-cache-v34";
 
 const ASSETS = [
   "./",

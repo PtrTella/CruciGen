@@ -4,7 +4,7 @@
 import { state } from "./state.js";
 import { dom } from "./dom.js";
 import { log } from "./logger.js";
-import { generateNewCrossword } from "./worker-client.js";
+import { generateNewCrossword, cancelGeneration } from "./worker-client.js";
 import { updateHighlights, focusCell } from "./ui.js";
 
 // Helper di navigazione
@@ -28,13 +28,11 @@ export function setupEventListeners() {
   dom.selectMode.addEventListener("change", () => {
     state.gameMode = dom.selectMode.value;
     log(`Modalità di gioco cambiata a: ${state.gameMode === "encrypted" ? "Crittografato" : "Classico"}`);
-    generateNewCrossword();
   });
 
   dom.selectDifficulty.addEventListener("change", () => {
     state.targetDifficulty = dom.selectDifficulty.value;
     log(`Target difficoltà cambiato a: ${state.targetDifficulty}`);
-    generateNewCrossword();
   });
 
   dom.btnNew.addEventListener("click", () => generateNewCrossword());
@@ -471,4 +469,47 @@ export function setupEventListeners() {
     dom.themeToggle.innerHTML = isLight ? '<i class="fa-solid fa-moon"></i>' : '<i class="fa-solid fa-sun"></i>';
     log(`Tema cambiato in modalità ${isLight ? "Chiara" : "Scura"}`);
   });
+
+  // Gestione pulsante annulla/interrompi generazione
+  if (dom.btnCancelGeneration) {
+    dom.btnCancelGeneration.addEventListener("click", () => {
+      cancelGeneration();
+    });
+  }
+
+  // Gestione menu hamburger mobile
+  if (dom.menuToggle && dom.controlsHeader) {
+    dom.menuToggle.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const isOpen = dom.controlsHeader.classList.toggle("open");
+      dom.menuToggle.innerHTML = isOpen ? '<i class="fa-solid fa-xmark"></i>' : '<i class="fa-solid fa-bars"></i>';
+      dom.menuToggle.setAttribute("aria-expanded", isOpen);
+    });
+
+    // Chiudi il menu ad hamburger se si clicca fuori
+    document.addEventListener("click", (e) => {
+      if (!dom.controlsHeader.contains(e.target) && !dom.menuToggle.contains(e.target)) {
+        dom.controlsHeader.classList.remove("open");
+        dom.menuToggle.innerHTML = '<i class="fa-solid fa-bars"></i>';
+        dom.menuToggle.setAttribute("aria-expanded", "false");
+      }
+    });
+
+    // Chiudi il menu al cambio di una qualsiasi opzione
+    const selectInputs = dom.controlsHeader.querySelectorAll("select");
+    selectInputs.forEach(select => {
+      select.addEventListener("change", () => {
+        dom.controlsHeader.classList.remove("open");
+        dom.menuToggle.innerHTML = '<i class="fa-solid fa-bars"></i>';
+        dom.menuToggle.setAttribute("aria-expanded", "false");
+      });
+    });
+
+    // Chiudi il menu al toggle del tema
+    dom.themeToggle.addEventListener("click", () => {
+      dom.controlsHeader.classList.remove("open");
+      dom.menuToggle.innerHTML = '<i class="fa-solid fa-bars"></i>';
+      dom.menuToggle.setAttribute("aria-expanded", "false");
+    });
+  }
 }

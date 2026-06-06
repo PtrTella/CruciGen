@@ -646,7 +646,133 @@ kbd {
   box-shadow: 0 1px 0 rgba(0,0,0,0.2);
 }
 
+/* --- Hamburger Menu, Controls Wrapper & Grid Placeholder --- */
+.menu-toggle {
+  display: none;
+}
+
+.controls-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.grid-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 280px;
+  color: var(--text-secondary);
+  gap: 1rem;
+  text-align: center;
+  padding: 2rem;
+}
+
+.placeholder-icon {
+  font-size: 3.5rem;
+  color: var(--accent-color);
+  opacity: 0.65;
+  filter: drop-shadow(0 0 10px var(--accent-glow));
+}
+
+#crossword-grid-container:has(.grid-placeholder) {
+  display: block;
+  background-color: transparent;
+  border: none;
+  box-shadow: none;
+  max-width: 100%;
+}
+
 /* --- Responsive Adjustments --- */
+@media (max-width: 768px) {
+  .header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    width: 100%;
+  }
+
+  .menu-toggle {
+    display: flex;
+    order: 1;
+    z-index: 101;
+  }
+
+  .logo {
+    order: 2;
+    margin-right: auto;
+    margin-left: 0.5rem;
+  }
+
+  .controls-wrapper {
+    order: 3;
+    display: flex;
+    align-items: center;
+  }
+
+  #btn-new {
+    padding: 0.5rem 0.8rem;
+    font-size: 0.85rem;
+  }
+
+  #btn-new span {
+    display: inline;
+  }
+
+  .controls-header {
+    display: none;
+    position: absolute;
+    top: calc(100% + 1rem);
+    left: -1rem;
+    right: -1rem;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
+    padding: 1.5rem;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1.25rem;
+    box-shadow: var(--shadow-lg);
+    z-index: 100;
+  }
+
+  .controls-header.open {
+    display: flex;
+  }
+
+  .controls-header .mode-selector,
+  .controls-header .size-selector,
+  .controls-header .difficulty-selector,
+  .controls-header select,
+  .controls-header #theme-toggle {
+    width: 100%;
+  }
+
+  .controls-header select {
+    padding: 0.6rem 1.8rem 0.6rem 0.8rem;
+  }
+
+  .controls-header #theme-toggle {
+    border-radius: var(--border-radius-sm);
+    height: auto;
+    padding: 0.6rem;
+  }
+}
+
+@media (max-width: 480px) {
+  #btn-new span {
+    display: none; /* Hide text on small screens, keep just icon */
+  }
+  #btn-new {
+    width: 2.2rem;
+    height: 2.2rem;
+    padding: 0;
+    border-radius: 50%;
+  }
+}
+
 @media (max-width: 900px) {
   .main-container {
     grid-template-columns: 1fr;

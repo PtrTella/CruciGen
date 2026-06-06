@@ -25,4 +25,7 @@ export function initDOM() {
   dom.cluesHorizontalCard = document.getElementById("clues-horizontal-card");
   dom.cluesVerticalCard = document.getElementById("clues-vertical-card");
   dom.difficultyBadge = document.getElementById("crossword-difficulty-badge");
+  dom.menuToggle = document.getElementById("menu-toggle");
+  dom.controlsHeader = document.getElementById("controls-header");
+  dom.btnCancelGeneration = document.getElementById("btn-cancel-generation");
 }

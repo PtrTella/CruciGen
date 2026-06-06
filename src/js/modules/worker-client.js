@@ -21,7 +21,7 @@ export function initWorker() {
     if (status === "ready") {
       log("Dizionario registrato nel Web Worker con successo!");
       state.dictionaryLoaded = true;
-      generateNewCrossword();
+      hideLoader();
     } else if (status === "success") {
       log(`Generazione completata con successo in ${result.steps} passi di backtracking!`);
       hideLoader();
@@ -56,12 +56,20 @@ export function initWorker() {
 }
 
 export async function loadDictionary() {
+  if (state.cachedDict) {
+    log("Dizionario caricato da cache interna...");
+    showLoader("Reinizializzazione dizionario...", false);
+    state.worker.postMessage({ action: "init", dict: state.cachedDict });
+    return;
+  }
+
   log("Avvio caricamento dizionario (dictionary.json)...");
-  showLoader("Caricamento dizionario italiano...");
+  showLoader("Caricamento dizionario italiano...", false);
   try {
     const response = await fetch("src/assets/dictionary.json?v=" + new Date().getTime());
     log(`Stato risposta fetch dizionario: ${response.status}`);
     const dict = await response.json();
+    state.cachedDict = dict;
 
     let totalWords = 0;
     for (const len in dict) {
@@ -83,7 +91,7 @@ export function generateNewCrossword(isRetry = false) {
   state.animationTimeouts.forEach(clearTimeout);
   state.animationTimeouts = [];
 
-  showLoader("Generazione schema in corso...");
+  showLoader("Generazione schema in corso...", true);
 
   if (isRetry !== true) {
     state.generationAttempts = 0;
@@ -97,6 +105,15 @@ export function generateNewCrossword(isRetry = false) {
     cols: size,
     targetDifficulty: state.targetDifficulty
   });
+}
+
+export function cancelGeneration() {
+  log("Generazione interrotta dall'utente. Reset Web Worker...");
+  if (state.worker) {
+    state.worker.terminate();
+  }
+  initWorker();
+  loadDictionary();
 }
 
 function initEncryptedCrossword(result) {
