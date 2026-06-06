@@ -1,16 +1,20 @@
 // src/js/worker/generator.js
 // Generatore procedurale di geometrie simmetriche con vincoli gaussiani per il Web Worker.
 
-function generateGridTopology(rows, cols) {
+function generateGridTopology(rows, cols, targetDifficulty) {
   let bestGrid = null;
   let bestScore = -Infinity;
   const maxAttempts = (typeof CRUCIGEN_CONFIG !== 'undefined' && CRUCIGEN_CONFIG.gridTopologyCandidates) || 300;
 
+  // Percentuale assoluta di caselle nere per ogni difficoltà, letta dal config
+  const cfg = (typeof CRUCIGEN_CONFIG !== 'undefined') ? CRUCIGEN_CONFIG : {};
+  const percentByDiff = cfg.blackSquarePercentByDifficulty || { easy: 0.23, medium: 0.17, hard: 0.12 };
+  const blackPercent = percentByDiff[targetDifficulty] || percentByDiff.medium || 0.17;
+  const blackSquareTarget = Math.floor(rows * cols * blackPercent);
+
+
   for (let i = 0; i < maxAttempts; i++) {
     let grid = Array(rows).fill(null).map(() => Array(cols).fill(' '));
-
-    // Target ideale di caselle nere usando la configurazione globale
-    const blackSquareTarget = Math.floor((rows * cols) * ((typeof CRUCIGEN_CONFIG !== 'undefined' && CRUCIGEN_CONFIG.blackSquareTargetMultiplier) || 0.16));
     let blackSquares = 0;
 
     while (blackSquares < blackSquareTarget) {
@@ -41,7 +45,7 @@ function generateGridTopology(rows, cols) {
       }
     }
 
-    let score = evaluateGridFitness(grid, rows, cols);
+    let score = evaluateGridFitness(grid, rows, cols, targetDifficulty);
     if (score > bestScore) {
       bestScore = score;
       bestGrid = grid;
@@ -51,13 +55,28 @@ function generateGridTopology(rows, cols) {
   return bestGrid;
 }
 
-// Logica completa di valutazione della griglia (Gaussiana + Flood Fill di connettività)
-function evaluateGridFitness(grid, rows, cols) {
+// Logica completa di valutazione della griglia (Gaussiana + Flood Fill di connettività + penalty ibride)
+function evaluateGridFitness(grid, rows, cols, targetDifficulty) {
   const lengthScores = (typeof CRUCIGEN_CONFIG !== 'undefined' && CRUCIGEN_CONFIG.lengthScores) || {};
 
   let score = 0;
   let totalWhiteCells = 0;
   let firstWhite = null;
+
+  // Bonus addizionale per slot della lunghezza "target" in base alla difficoltà:
+  //   easy → premia slot di 4-6 lettere, penalizza 8+
+  //   hard → premia slot di 7-9 lettere, penalizza 1-4
+  function difficultyLengthBonus(len) {
+    if (targetDifficulty === 'easy') {
+      if (len >= 4 && len <= 6) return 20;
+      if (len >= 7) return -10 * (len - 6);
+    } else if (targetDifficulty === 'hard') {
+      if (len >= 7 && len <= 9) return 20;
+      if (len >= 10) return -5 * (len - 9);
+      if (len <= 4) return -10 * (5 - len);
+    }
+    return 0;
+  }
 
   // Analisi slot Orizzontali
   for (let r = 0; r < rows; r++) {
@@ -69,12 +88,12 @@ function evaluateGridFitness(grid, rows, cols) {
         if (!firstWhite) firstWhite = { r, c };
       } else {
         if (len > 0) {
-          score += (lengthScores[len] !== undefined ? lengthScores[len] : 0);
+          score += (lengthScores[len] !== undefined ? lengthScores[len] : 0) + difficultyLengthBonus(len);
           len = 0;
         }
       }
     }
-    if (len > 0) score += (lengthScores[len] !== undefined ? lengthScores[len] : 0);
+    if (len > 0) score += (lengthScores[len] !== undefined ? lengthScores[len] : 0) + difficultyLengthBonus(len);
   }
 
   // Analisi slot Verticali
@@ -85,12 +104,12 @@ function evaluateGridFitness(grid, rows, cols) {
         len++;
       } else {
         if (len > 0) {
-          score += (lengthScores[len] !== undefined ? lengthScores[len] : 0);
+          score += (lengthScores[len] !== undefined ? lengthScores[len] : 0) + difficultyLengthBonus(len);
           len = 0;
         }
       }
     }
-    if (len > 0) score += (lengthScores[len] !== undefined ? lengthScores[len] : 0);
+    if (len > 0) score += (lengthScores[len] !== undefined ? lengthScores[len] : 0) + difficultyLengthBonus(len);
   }
 
   if (totalWhiteCells === 0) return -Infinity;
@@ -137,7 +156,7 @@ function evaluateGridFitness(grid, rows, cols) {
     }
   }
 
-  // 2. Penalizzazione per caselle nere sui bordi esterni (tende a produrre slot più corti)
+  // 2. Penalizzazione per caselle nere sui bordi esterni
   for (let c = 0; c < cols; c++) {
     if (grid[0][c] === '#') score -= 25;
     if (grid[rows - 1][c] === '#') score -= 25;
@@ -162,5 +181,4 @@ function evaluateGridFitness(grid, rows, cols) {
   }
 
   return score;
-
 }

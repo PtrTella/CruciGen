@@ -37,12 +37,21 @@ const CRUCIGEN_CONFIG = {
     15: 45000                         // 15x15
   },
   candidateJitterWindow: 80,          // Parole top rimescolate per varietà
-  blackSquareTargetMultiplier: 0.17,  // % ideale caselle nere (0.17 = 17%)
-  lengthScores: generateGaussScores(), // Punteggi lunghezze parole (Gaussiana)
-  difficultyWeights: {
-    easyBiasMultiplier: 500,          // Moltiplicatore spinta per parole facili
-    hardBiasMultiplier: 100           // Moltiplicatore spinta per parole difficili
-  }
+  // Percentuale assoluta di caselle nere per ogni livello di difficoltà
+  // easy  → più nere → slot corti → parole comuni brevi
+  // medium → bilanciato
+  // hard  → meno nere → slot lunghi → parole rare lunghe
+  blackSquarePercentByDifficulty: {
+    easy:   0.23,                     // 23% caselle nere
+    medium: 0.17,                     // 17% caselle nere
+    hard:   0.12                      // 12% caselle nere
+  },
+  // Soglie rating parola per i pool preferred/fallback (0.0 = facilissima, 1.0 = difficilissima)
+  difficultyThresholds: {
+    easy: 0.35,                       // Sotto questa soglia → parola "facile"
+    hard: 0.65                        // Sopra questa soglia → parola "difficile"
+  },
+  lengthScores: generateGaussScores() // Punteggi lunghezze parole (Gaussiana)
 };
 
 // Rendiamo l'oggetto accessibile globalmente nei diversi contesti

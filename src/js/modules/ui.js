@@ -390,10 +390,15 @@ export function updateDifficultyBadge() {
   let label = "";
   let className = "";
   
-  if (diff < 0.32) {
+  // Soglie allineate con CRUCIGEN_CONFIG.difficultyThresholds
+  const thresholds = (typeof CRUCIGEN_CONFIG !== 'undefined' && CRUCIGEN_CONFIG.difficultyThresholds)
+    ? CRUCIGEN_CONFIG.difficultyThresholds
+    : { easy: 0.35, hard: 0.65 };
+
+  if (diff < thresholds.easy) {
     label = "Facile";
     className = "easy";
-  } else if (diff < 0.50) {
+  } else if (diff < thresholds.hard) {
     label = "Medio";
     className = "medium";
   } else {

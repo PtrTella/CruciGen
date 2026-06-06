@@ -56,7 +56,7 @@ self.onmessage = function (e) {
 
       // Se non viene passato un template precompilato, lo generiamo proceduralmente
       if (!actualTemplate && rows && cols) {
-        actualTemplate = generateGridTopology(rows, cols);
+        actualTemplate = generateGridTopology(rows, cols, targetDifficulty);
       }
 
       if (!actualTemplate) {

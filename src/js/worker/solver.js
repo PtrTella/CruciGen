@@ -1,36 +1,9 @@
-function getDynamicScore(word, len, targetDifficulty) {
-  let baseScore = wordScores[word] || 0;
-  if (!targetDifficulty || targetDifficulty === "medium") {
-    return baseScore;
-  }
-
-  let difficulty = 0.5;
-  if (typeof dictionary !== 'undefined' && dictionary) {
-    const lenBucket = dictionary[len.toString()];
-    const entry = lenBucket && lenBucket[word];
-    if (entry && typeof entry === 'object' && 'difficulty' in entry) {
-      difficulty = entry.difficulty;
-    }
-  }
-
-  // Se la parola ha lunghezza <= 3, la trattiamo come "facile" per evitare stalli sul backtracking
-  if (len <= 3) {
-    difficulty = 0.1;
-  }
-
-  const easyMult = (typeof CRUCIGEN_CONFIG !== 'undefined' && CRUCIGEN_CONFIG.difficultyWeights && CRUCIGEN_CONFIG.difficultyWeights.easyBiasMultiplier) || 100;
-  const hardMult = (typeof CRUCIGEN_CONFIG !== 'undefined' && CRUCIGEN_CONFIG.difficultyWeights && CRUCIGEN_CONFIG.difficultyWeights.hardBiasMultiplier) || 100;
-
-  if (targetDifficulty === "easy") {
-    // Spinge fortemente sulle parole facili (valore basso di difficulty)
-    return (1.0 - difficulty) * easyMult + baseScore;
-  } else if (targetDifficulty === "hard") {
-    // Spinge fortemente sulle parole difficili (valore alto di difficulty)
-    return difficulty * hardMult + baseScore;
-  }
-
-  return baseScore;
+// Punteggio base della parola (vocale ratio + unicità + difficoltà inversamente pesata)
+// Usato per ordinamento in medium mode e fallback pool in easy/hard.
+function getBaseScore(word) {
+  return wordScores[word] || 0;
 }
+
 
 function generateCrossword(template, targetDifficulty) {
   const rows = template.length;
@@ -156,21 +129,57 @@ function generateCrossword(template, targetDifficulty) {
 
     const currentSlot = slots[slotIndex];
 
-    // Ordina TUTTI i candidati in base al punteggio dinamico di difficoltà desiderato prima di applicare la finestra di jitter.
-    // In questo modo, le parole effettivamente più facili (o difficili) emergono indipendentemente dalla loro lettera iniziale.
-    bestCandidates.sort((a, b) => getDynamicScore(b, currentSlot.length, targetDifficulty) - getDynamicScore(a, currentSlot.length, targetDifficulty));
+    // Strategia a due pool basata sul rating di difficoltà della parola:
+    //   easy  → preferred = difficulty < 0.35 (parole comuni/frequenti)
+    //   hard  → preferred = difficulty > 0.65 (parole rare/oscure)
+    //   medium → ordinamento con jitter standard
+    //
+    // Il solver prova PRIMA tutte le preferred, poi le fallback solo se necessario.
+    // Questo garantisce che il risultato finale sia composto prevalentemente
+    // da parole nel livello target, anche attraverso il backtracking.
+    const lenStr = currentSlot.length.toString();
+    const lenBucket = (typeof dictionary !== 'undefined') ? dictionary[lenStr] : null;
 
-    const jitterWindow = CRUCIGEN_CONFIG.candidateJitterWindow || 50;
-    if (bestCandidates.length > jitterWindow) {
-      const topPart = bestCandidates.slice(0, jitterWindow);
-      // Applica un piccolo jitter per variare gli schemi generati
-      topPart.sort((a, b) => (getDynamicScore(b, currentSlot.length, targetDifficulty) + Math.random() * 3) - (getDynamicScore(a, currentSlot.length, targetDifficulty) + Math.random() * 3));
-      bestCandidates = topPart.concat(bestCandidates.slice(jitterWindow));
-    } else {
-      bestCandidates.sort((a, b) => (getDynamicScore(b, currentSlot.length, targetDifficulty) + Math.random() * 3) - (getDynamicScore(a, currentSlot.length, targetDifficulty) + Math.random() * 3));
+    function getWordDifficulty(word) {
+      const entry = lenBucket && lenBucket[word];
+      return (entry && entry.difficulty != null) ? entry.difficulty : 0.5;
     }
 
-    for (const candidate of bestCandidates) {
+    let orderedCandidates;
+
+    if (targetDifficulty === 'easy' || targetDifficulty === 'hard') {
+      const preferred = [];
+      const fallback  = [];
+      const thresholds = (typeof CRUCIGEN_CONFIG !== 'undefined' && CRUCIGEN_CONFIG.difficultyThresholds) || { easy: 0.35, hard: 0.65 };
+      const threshold = targetDifficulty === 'easy' ? thresholds.easy : thresholds.hard;
+
+
+      for (const word of bestCandidates) {
+        const d = getWordDifficulty(word);
+        const isPreferred = targetDifficulty === 'easy' ? d < threshold : d > threshold;
+        (isPreferred ? preferred : fallback).push(word);
+      }
+
+      // Ordina ciascun pool per difficoltà nella direzione target
+      const cmp = targetDifficulty === 'easy'
+        ? (a, b) => getWordDifficulty(a) - getWordDifficulty(b)   // facili prima
+        : (a, b) => getWordDifficulty(b) - getWordDifficulty(a);  // difficili prima
+
+      // Piccolo jitter per varietà tra parole con rating simile
+      preferred.sort((a, b) => cmp(a, b) + (Math.random() - Math.random()) * 0.05);
+      fallback.sort((a, b) => getBaseScore(b) - getBaseScore(a));
+
+      orderedCandidates = preferred.concat(fallback);
+    } else {
+      // Medium: ordinamento con jitter standard
+      const baseJitter = CRUCIGEN_CONFIG.candidateJitterWindow || 80;
+      bestCandidates.sort((a, b) => getBaseScore(b) - getBaseScore(a));
+      const topPart = bestCandidates.slice(0, baseJitter);
+      topPart.sort((a, b) => (getBaseScore(b) + Math.random() * 3) - (getBaseScore(a) + Math.random() * 3));
+      orderedCandidates = topPart.concat(bestCandidates.slice(baseJitter));
+    }
+
+    for (const candidate of orderedCandidates) {
       if (usedWords.has(candidate)) continue;
 
       usedWords.add(candidate);
