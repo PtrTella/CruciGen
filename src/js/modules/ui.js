@@ -380,41 +380,92 @@ export function animateClueWordReveal(bestClue) {
   state.animationTimeouts.push(propagationTimeoutId);
 }
 
-// Aggiorna il badge di difficoltà complessiva dello schema
+// Calcola la tonalità (hue) della difficoltà lungo un gradiente verde-arancione-rosso
+function getDifficultyHue(diff) {
+  // Interpolazione HSL: 0% = verde (120), 50% = arancione (35), 100% = rosso (0)
+  if (diff <= 0.5) {
+    return Math.round(120 - (diff / 0.5) * (120 - 35));
+  } else {
+    return Math.round(35 - ((diff - 0.5) / 0.5) * 35);
+  }
+}
+
+// Aggiorna il badge di difficoltà complessiva dello schema, lo sfondo del contenitore ed il badge percentuale
 export function updateDifficultyBadge() {
-  if (!dom.difficultyBadge) return;
-  
+  const gridCard = dom.gridContainer ? dom.gridContainer.parentElement : null;
+
   if (!state.currentCrossword || state.currentCrossword.difficulty === undefined) {
-    dom.difficultyBadge.classList.add("hidden");
+    if (gridCard) {
+      gridCard.style.backgroundColor = "";
+      gridCard.style.borderColor = "";
+      gridCard.style.boxShadow = "";
+    }
+    if (dom.gridContainer) {
+      dom.gridContainer.style.borderColor = "";
+      dom.gridContainer.style.boxShadow = "";
+    }
+    if (dom.difficultyPercent) {
+      dom.difficultyPercent.classList.add("hidden");
+    }
+    if (dom.difficultyBadge) {
+      dom.difficultyBadge.classList.add("hidden");
+    }
     return;
   }
   
   const diff = state.currentCrossword.difficulty;
-  
-  // Rimuovi vecchie classi di difficoltà
-  dom.difficultyBadge.classList.remove("easy", "medium", "hard", "hidden");
-  
-  let label = "";
-  let className = "";
-  
-  // Soglie allineate con CRUCIGEN_CONFIG.difficultyThresholds
-  const thresholds = (typeof CRUCIGEN_CONFIG !== 'undefined' && CRUCIGEN_CONFIG.difficultyThresholds)
-    ? CRUCIGEN_CONFIG.difficultyThresholds
-    : { easy: 0.35, hard: 0.65 };
-
-  if (diff < thresholds.easy) {
-    label = "Facile";
-    className = "easy";
-  } else if (diff < thresholds.hard) {
-    label = "Medio";
-    className = "medium";
-  } else {
-    label = "Difficile";
-    className = "hard";
-  }
-  
   const percent = Math.round(diff * 100);
+  const roundedHue = getDifficultyHue(diff);
   
-  dom.difficultyBadge.innerHTML = `<i class="fa-solid fa-gauge-high"></i> Difficoltà: <strong>${label} (${percent}%)</strong>`;
-  dom.difficultyBadge.classList.add(className);
+  const color = `hsl(${roundedHue}, 65%, 55%)`;
+  const bgTint = `hsla(${roundedHue}, 65%, 55%, 0.08)`;
+  const borderTint = `hsla(${roundedHue}, 65%, 55%, 0.25)`;
+  const shadowTint = `0 16px 48px -6px hsla(${roundedHue}, 65%, 55%, 0.15), 0 0 24px 0 hsla(${roundedHue}, 65%, 55%, 0.08)`;
+
+  // Applica lo sfondo tenue, bordo e ombra al box contenitore (.grid-card)
+  if (gridCard) {
+    gridCard.style.backgroundColor = bgTint;
+    gridCard.style.borderColor = borderTint;
+    gridCard.style.boxShadow = shadowTint;
+  }
+
+  // Ripristina stili inline per il cruciverba stesso (ora governato da CSS statico)
+  if (dom.gridContainer) {
+    dom.gridContainer.style.borderColor = "";
+    dom.gridContainer.style.boxShadow = "";
+  }
+
+  // Aggiorna la percentuale di fianco alle impostazioni
+  if (dom.difficultyPercentVal) {
+    dom.difficultyPercentVal.innerText = `${percent}%`;
+  }
+  if (dom.difficultyPercent) {
+    dom.difficultyPercent.style.color = color;
+    dom.difficultyPercent.style.borderColor = color;
+    dom.difficultyPercent.classList.remove("hidden");
+  }
+
+  // Lasciamo aggiornato anche il badge legacy per compatibilità, ma forzato hidden
+  if (dom.difficultyBadge) {
+    dom.difficultyBadge.classList.remove("easy", "medium", "hard", "hidden");
+    let label = "";
+    let className = "";
+    const thresholds = (typeof CRUCIGEN_CONFIG !== 'undefined' && CRUCIGEN_CONFIG.difficultyThresholds)
+      ? CRUCIGEN_CONFIG.difficultyThresholds
+      : { easy: 0.35, hard: 0.65 };
+
+    if (diff < thresholds.easy) {
+      label = "Facile";
+      className = "easy";
+    } else if (diff < thresholds.hard) {
+      label = "Medio";
+      className = "medium";
+    } else {
+      label = "Difficile";
+      className = "hard";
+    }
+    dom.difficultyBadge.innerHTML = `<i class="fa-solid fa-gauge-high"></i> Difficoltà: <strong>${label} (${percent}%)</strong>`;
+    dom.difficultyBadge.classList.add(className);
+    dom.difficultyBadge.classList.add("hidden");
+  }
 }
