@@ -1,7 +1,7 @@
 {
   "name": "CruciGen - Cruciverba Infiniti",
   "short_name": "CruciGen",
-  "description": "Generatore infinito di parole crociate e cruciverba professionali e simmetrici in italiano.",
+  "description": "Generatore infinito di parole crociate e cruciverba in italiano.",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#0f172a",

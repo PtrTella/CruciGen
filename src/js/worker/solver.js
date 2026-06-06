@@ -72,11 +72,15 @@ function generateCrossword(template, targetDifficulty) {
     slot.patternIndices = slot.cells.map(([r, c]) => ({ r, c }));
   });
 
-  let steps = 0;
-  // Soglia di passi dinamica in base alle dimensioni della griglia
+  // Soglia di passi dinamica: dimensione × moltiplicatore difficoltà
+  // hard usa parole più rare → più backtracking → più passi necessari
   const sizeKey = Math.max(rows, cols);
-  const maxSteps = (CRUCIGEN_CONFIG.maxStepsBySize && CRUCIGEN_CONFIG.maxStepsBySize[sizeKey]) || 3000;
+  const baseSteps = (CRUCIGEN_CONFIG.maxStepsBySize && CRUCIGEN_CONFIG.maxStepsBySize[sizeKey]) || 3000;
+  const diffMultiplier = targetDifficulty === 'hard' ? 1.5 : (targetDifficulty === 'easy' ? 0.8 : 1.0);
+  const maxSteps = Math.round(baseSteps * diffMultiplier);
   const usedWords = new Set();
+  let steps = 0;
+
 
   function solve(slotIndex) {
     steps++;

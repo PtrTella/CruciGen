@@ -40,7 +40,7 @@ export function initWorker() {
       const maxAtt = (typeof CRUCIGEN_CONFIG !== 'undefined' && CRUCIGEN_CONFIG.maxGenerationAttempts) || 5;
       if (state.generationAttempts < maxAtt) {
         state.generationAttempts++;
-        log(`Tentativo di generazione #${state.generationAttempts + 1} con un layout/trasformazione alternativo...`);
+        log(`Tentativo di generazione #${state.generationAttempts + 1} con un layout alternativo...`);
         generateNewCrossword(true);
       } else {
         log("[ERRORE] Raggiunto il limite massimo di tentativi di generazione.");
@@ -78,7 +78,7 @@ export async function loadDictionary() {
 
 export function generateNewCrossword(isRetry = false) {
   if (!state.dictionaryLoaded) return;
-  
+
   // Pulisci eventuali animazioni in corso prima della nuova generazione
   state.animationTimeouts.forEach(clearTimeout);
   state.animationTimeouts = [];
@@ -91,11 +91,11 @@ export function generateNewCrossword(isRetry = false) {
 
   const size = parseInt(dom.selectSize ? dom.selectSize.value : 9) || 9;
   log(`Richiesta nuova topologia ${size}x${size} al Web Worker con target difficoltà: ${state.targetDifficulty}...`);
-  state.worker.postMessage({ 
-    action: "generate", 
-    rows: size, 
+  state.worker.postMessage({
+    action: "generate",
+    rows: size,
     cols: size,
-    targetDifficulty: state.targetDifficulty 
+    targetDifficulty: state.targetDifficulty
   });
 }
 
@@ -139,7 +139,7 @@ function initEncryptedCrossword(result) {
   // 3. Trova una parola indizio iniziale (lunghezza 3 o 4) con massimo punteggio di occorrenza
   const candidates = [];
   const allClues = [...result.horizontalClues, ...result.verticalClues];
-  
+
   // Trova i candidati di lunghezza 3 o 4
   let targetClues = allClues.filter(c => c.length === 3 || c.length === 4);
   if (targetClues.length === 0) {
