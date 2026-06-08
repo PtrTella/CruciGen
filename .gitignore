@@ -2,3 +2,4 @@ utils/dataset_difficulty/
 utils/dataset/
 scratch/
 */__pycache__/*
+src/assets/dictionary.json.bak

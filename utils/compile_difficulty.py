@@ -187,7 +187,9 @@ def parse_itwac(local_paths: dict) -> dict:
 
     # 2. Load each itWaC CSV
     for category, path in local_paths.items():
-        default_pos = "n" if category == "nouns" else ("a" if category == "adj" else "v")
+        default_pos = (
+            "n" if category == "nouns" else ("a" if category == "adj" else "v")
+        )
         print(f"  Parsing itWaC {category}...")
 
         with open(path, "r", encoding="iso-8859-1", errors="ignore") as f:
@@ -228,7 +230,7 @@ def parse_itwac(local_paths: dict) -> dict:
                         pos_code = "a"
                     elif "VER" in pos_val:
                         pos_code = "v"
-                
+
                 # Fallback to category default
                 if not pos_code:
                     pos_code = default_pos
@@ -248,7 +250,9 @@ def parse_itwac(local_paths: dict) -> dict:
     return itwac_map
 
 
-def segment_word(s: str, itwac_map: dict, memo: Optional[dict] = None) -> Optional[list]:
+def segment_word(
+    s: str, itwac_map: dict, memo: Optional[dict] = None
+) -> Optional[list]:
     """
     Recursive best-path segmentation of a compound word into known sub-words.
     Used only for words of length >= 11 that are absent from itWaC.
@@ -352,7 +356,11 @@ def main():
                 clues = value["clues"]
             elif isinstance(value, list):
                 # If it's already in the compact format [difficulty, clues_list, pos]
-                if len(value) == 3 and isinstance(value[1], list) and isinstance(value[0], (int, float)):
+                if (
+                    len(value) == 3
+                    and isinstance(value[1], list)
+                    and isinstance(value[0], (int, float))
+                ):
                     clues = value[1]
                 else:
                     clues = value
@@ -366,7 +374,7 @@ def main():
 
             if entry:
                 zipf = entry["zipf"]
-                pos = entry["pos"]
+                pos = entry["pos"] if len(word) >= 4 else None
                 matched += 1
 
             elif len(word) >= 11:
