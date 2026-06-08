@@ -73,8 +73,8 @@ const CRUCIGEN_CONFIG = {
   // ── Gaussiana per valutazione slot ───────────────────────────────────────
   // center = Math.round(N_cols × fraction)  — si adatta alla dimensione reale.
   lengthCenterFractions: {
-    easy: 0.5,   // metà griglia  (invariato)
-    medium: 0.6,   // ~5/8 griglia  (era 0.67, ridotto per evitare slot impossibili su 15x15)
+    easy: 0.6,   // metà griglia  (invariato)
+    medium: 0.65,   // ~5/8 griglia  (era 0.67, ridotto per evitare slot impossibili su 15x15)
     hard: 0.7    // ~3/4 griglia  (era 0.80, ridotto per bilanciare qualità e risolvibilità)
   }
 
