@@ -512,4 +512,20 @@ export function setupEventListeners() {
       dom.menuToggle.setAttribute("aria-expanded", "false");
     });
   }
+
+  // Toggle globale della visibilità del pannello console tramite combinazione tasti (Ctrl/Cmd + \ o Ctrl/Cmd + Shift + L)
+  document.addEventListener("keydown", (e) => {
+    const hasModifier = e.ctrlKey || e.metaKey;
+    const isCtrlBackslash = hasModifier && (e.key === "\\" || e.code === "Backslash");
+    const isCtrlShiftL = hasModifier && e.shiftKey && (e.key === "l" || e.key === "L" || e.code === "KeyL");
+    
+    if (isCtrlBackslash || isCtrlShiftL) {
+      e.preventDefault();
+      const consoleSection = document.querySelector(".console-section");
+      if (consoleSection) {
+        const isCurrentlyHidden = consoleSection.classList.toggle("hidden");
+        log(`Console ${isCurrentlyHidden ? "nascosta" : "mostrata"} tramite scorciatoia tastiera`);
+      }
+    }
+  });
 }
