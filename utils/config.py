@@ -1,7 +1,6 @@
 import os
 import json
 import subprocess
-import re
 
 
 def _load_config():
@@ -44,16 +43,9 @@ def _load_config():
         # Fallback dictionary if node execution fails
         config = {
             "difficultyThresholds": {"easy": 0.32, "hard": 0.62},
-            "lengthCenterFractions": {
-                "easy": 0.50,
-                "medium": 0.62,
-                "hard": 0.72
-            }
+            "lengthCenterFractions": {"easy": 0.50, "medium": 0.62, "hard": 0.72},
         }
-        computed = {
-            "getBacktrackingSteps": {},
-            "getBlackSquarePercent": {}
-        }
+        computed = {"getBacktrackingSteps": {}, "getBlackSquarePercent": {}}
         sizes = [9, 11, 13, 15]
         difficulties = ["easy", "medium", "hard"]
         for size in sizes:
@@ -62,26 +54,34 @@ def _load_config():
             for diff in difficulties:
                 base_steps = 800
                 diff_mult_steps = {"easy": 1, "medium": 1.3, "hard": 1.9}[diff]
-                size_mult_steps = (1.12 ** (size - 9))
-                computed["getBacktrackingSteps"][str(size)][diff] = int(round(base_steps * size_mult_steps * diff_mult_steps))
-                
+                size_mult_steps = 1.12 ** (size - 9)
+                computed["getBacktrackingSteps"][str(size)][diff] = int(
+                    round(base_steps * size_mult_steps * diff_mult_steps)
+                )
+
                 base_pct = 0.14
                 diff_mult_pct = {"easy": 1.46, "medium": 1.13, "hard": 1}[diff]
                 size_mult_pct = 1.0 + (size - 9) * 0.03
-                computed["getBlackSquarePercent"][str(size)][diff] = base_pct * size_mult_pct * diff_mult_pct
+                computed["getBlackSquarePercent"][str(size)][diff] = (
+                    base_pct * size_mult_pct * diff_mult_pct
+                )
         return config, computed
 
 
 CRUCIGEN_CONFIG, COMPUTED_VALUES = _load_config()
 
 if __name__ == "__main__":
-    print("\n==========================================================================")
+    print(
+        "\n=========================================================================="
+    )
     print("                    CRUCIGEN CONFIGURATION PREVIEW                        ")
     print("==========================================================================")
     print(json.dumps(CRUCIGEN_CONFIG, indent=2))
     print("==========================================================================")
-    
-    print("\n==========================================================================")
+
+    print(
+        "\n=========================================================================="
+    )
     print("                 CALCULATED BACKTRACKING STEPS MATRIX                     ")
     print("==========================================================================")
     print(f"{'Size':<6} | {'Easy':<10} | {'Medium':<10} | {'Hard':<10}")
@@ -95,7 +95,9 @@ if __name__ == "__main__":
         print(f"{size:<2}x{size:<2}  | {easy_val:<10} | {med_val:<10} | {hard_val:<10}")
     print("==========================================================================")
 
-    print("\n==========================================================================")
+    print(
+        "\n=========================================================================="
+    )
     print("                 CALCULATED BLACK SQUARE PERCENT MATRIX                   ")
     print("==========================================================================")
     print(f"{'Size':<6} | {'Easy':<14} | {'Medium':<14} | {'Hard':<14}")
@@ -105,7 +107,7 @@ if __name__ == "__main__":
         easy_val = pct_data.get("easy", 0.0)
         med_val = pct_data.get("medium", 0.0)
         hard_val = pct_data.get("hard", 0.0)
-        
+
         easy_str = f"{easy_val * 100:.2f}% ({easy_val:.3f})" if easy_val else "N/A"
         med_str = f"{med_val * 100:.2f}% ({med_val:.3f})" if med_val else "N/A"
         hard_str = f"{hard_val * 100:.2f}% ({hard_val:.3f})" if hard_val else "N/A"
