@@ -38,6 +38,7 @@ import random
 import urllib.request
 import ssl
 import unicodedata
+from typing import Optional
 
 MAX_CLUES = 20  # max clues stored per word; only 1 shown per puzzle
 
@@ -186,10 +187,10 @@ def parse_itwac(local_paths: dict) -> dict:
 
     # 2. Load each itWaC CSV
     for category, path in local_paths.items():
-        pos_code = "n" if category == "nouns" else ("a" if category == "adj" else "v")
+        default_pos = "n" if category == "nouns" else ("a" if category == "adj" else "v")
         print(f"  Parsing itWaC {category}...")
 
-        with open(path, "r", encoding="utf-8", errors="ignore") as f:
+        with open(path, "r", encoding="iso-8859-1", errors="ignore") as f:
             reader = csv.reader(f)
             try:
                 header = next(reader)
@@ -200,6 +201,9 @@ def parse_itwac(local_paths: dict) -> dict:
             form_idx = next((i for i, c in enumerate(header) if c.lower() == "form"), 0)
             lemma_idx = next(
                 (i for i, c in enumerate(header) if c.lower() == "lemma"), 2
+            )
+            pos_idx = next(
+                (i for i, c in enumerate(header) if c.lower() == "pos"), None
             )
             zipf_idx = next(
                 (i for i, c in enumerate(header) if c.lower() == "zipf"),
@@ -213,6 +217,21 @@ def parse_itwac(local_paths: dict) -> dict:
                     zipf = float(row[zipf_idx])
                 except ValueError:
                     continue
+
+                # Read POS from the POS column if available
+                pos_code = None
+                if pos_idx is not None and pos_idx < len(row):
+                    pos_val = row[pos_idx].strip().upper()
+                    if "NOUN" in pos_val:
+                        pos_code = "n"
+                    elif "ADJ" in pos_val:
+                        pos_code = "a"
+                    elif "VER" in pos_val:
+                        pos_code = "v"
+                
+                # Fallback to category default
+                if not pos_code:
+                    pos_code = default_pos
 
                 # Index both the inflected form AND the lemma
                 for raw_word in (row[form_idx].strip(), row[lemma_idx].strip()):
@@ -229,7 +248,7 @@ def parse_itwac(local_paths: dict) -> dict:
     return itwac_map
 
 
-def segment_word(s: str, itwac_map: dict, memo: dict | None = None) -> list | None:
+def segment_word(s: str, itwac_map: dict, memo: Optional[dict] = None) -> Optional[list]:
     """
     Recursive best-path segmentation of a compound word into known sub-words.
     Used only for words of length >= 11 that are absent from itWaC.
@@ -328,11 +347,15 @@ def main():
         new_dictionary[length_str] = {}
 
         for word, value in words.items():
-            # Extract clues, handling both old list format and current dict format
+            # Extract clues, handling compact format, old list format, and dict format
             if isinstance(value, dict) and "clues" in value:
                 clues = value["clues"]
             elif isinstance(value, list):
-                clues = value
+                # If it's already in the compact format [difficulty, clues_list, pos]
+                if len(value) == 3 and isinstance(value[1], list) and isinstance(value[0], (int, float)):
+                    clues = value[1]
+                else:
+                    clues = value
             else:
                 clues = []
 

@@ -1,1 +1,4 @@
 utils/dataset_difficulty/
+utils/dataset/
+scratch/
+*/__pycache__/*

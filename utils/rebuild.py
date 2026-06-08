@@ -47,8 +47,11 @@ def run_step(label: str, fn, *args, **kwargs):
 
 def main():
     args = sys.argv[1:]
-    mode_full  = "--full"  in args
-    mode_stats = "--stats" in args
+    mode_full   = "--full"  in args
+    mode_stats  = "--stats" in args
+
+    # Parse options (default is to run typo cleaning, disable via --no-clean)
+    run_clean = "--no-clean" not in args
 
     print("=" * 60)
     print("  CruciGen — Pipeline rigenerazione dizionario")
@@ -85,6 +88,16 @@ def main():
         compile_difficulty.main
     )
 
+    # Step 1.5 — Rimozione refusi (typos)
+    if run_clean:
+        import clean_typos
+        run_step(
+            "Step 1.5 — Rimozione refusi (typos)",
+            clean_typos.main
+        )
+    else:
+        print("\n  [INFO] Rimozione refusi saltata (--no-clean)")
+
     # Step 2 — Ottimizza formato
     import optimize_dictionary
     run_step(
@@ -103,6 +116,7 @@ def main():
     print("  ✓ Pipeline completata.")
     if not mode_full:
         print("  Nota: per scaricare anche il raw dataset, usa --full")
+    print("  Nota: per saltare la rimozione dei refusi, usa --no-clean")
     print("=" * 60 + "\n")
 
 
